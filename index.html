@@ -1,0 +1,4643 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>修仙模拟器 v4.3 - 装备系统优化版</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 白金主题 - 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0;
+            padding: 10px;
+            position: relative;
+        }
+        
+        .game-wrapper {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1), 
+                        0 0 30px rgba(212, 175, 55, 0.1);
+            position: relative;
+            overflow: hidden;
+            border: 3px solid #d4af37;
+            width: 100%;
+        }
+        
+        .game-wrapper::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(to right, #d4af37, #f5f5dc, #c0c0c0);
+            z-index: 10;
+        }
+        
+        header {
+            text-align: center;
+            padding: 15px;
+            margin-bottom: 0;
+            position: relative;
+            background: linear-gradient(to bottom, rgba(212, 175, 55, 0.1), transparent);
+        }
+        
+        h1 {
+            font-size: 1.6rem;
+            background: linear-gradient(to right, #b8860b, #d4af37, #daa520);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            margin-bottom: 0;
+            font-weight: 800;
+            position: relative;
+            display: inline-block;
+            text-shadow: 0 2px 10px rgba(212, 175, 55, 0.2);
+            padding: 0 10px;
+        }
+        
+        .subtitle {
+            font-size: 0.8rem;
+            color: #b8860b;
+            font-style: italic;
+            margin-top: 2px;
+            text-shadow: 0 0 8px rgba(184, 134, 11, 0.3);
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding: 0 10px;
+        }
+        
+        @media (min-width: 992px) {
+            .game-container {
+                flex-direction: row;
+            }
+        }
+        
+        .main-content {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .side-content {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .panel {
+            background: rgba(248, 249, 250, 0.9);
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+            border: 2px solid #d4af37;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .panel::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, #d4af37, #daa520);
+            z-index: 1;
+        }
+        
+        .panel-title {
+            font-size: 1.1rem;
+            color: #b8860b;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            padding-bottom: 6px;
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .panel-title i {
+            color: #d4af37;
+            font-size: 1rem;
+        }
+        
+        /* 选项卡样式 */
+        .tab-container {
+            display: flex;
+            border-bottom: 2px solid rgba(212, 175, 55, 0.2);
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .tab {
+            padding: 8px 12px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            white-space: nowrap;
+            flex-shrink: 0;
+            font-size: 0.85rem;
+        }
+        
+        .tab.active {
+            color: #b8860b;
+            border-bottom-color: #d4af37;
+            background: rgba(212, 175, 55, 0.1);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* 天赋卡片 - 缩小版 */
+        .buff-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        
+        @media (min-width: 768px) {
+            .buff-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .buff-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .buff-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            padding: 8px;
+            width: 100%;
+            border: 2px solid #d4af37;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 90px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .buff-card:hover, .buff-card:active {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.15);
+            border-color: #b8860b;
+        }
+        
+        .buff-card.selected {
+            border-width: 2px;
+            box-shadow: 0 0 15px rgba(184, 134, 11, 0.25);
+            background: rgba(212, 175, 55, 0.08);
+        }
+        
+        .buff-card.common {
+            border-color: #999;
+        }
+        
+        .buff-card.rare {
+            border-color: #4682b4;
+        }
+        
+        .buff-card.epic {
+            border-color: #9370db;
+        }
+        
+        .buff-card.legendary {
+            border-color: #daa520;
+            animation: pulse 2s infinite;
+        }
+        
+        .buff-card.mythic {
+            border-color: #ff4500;
+            animation: pulse-glow 1.5s infinite alternate;
+        }
+        
+        .buff-rarity {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .common .buff-rarity {
+            background: linear-gradient(135deg, #999, #bbb);
+        }
+        
+        .rare .buff-rarity {
+            background: linear-gradient(135deg, #4682b4, #5f9ea0);
+        }
+        
+        .epic .buff-rarity {
+            background: linear-gradient(135deg, #9370db, #ba55d3);
+        }
+        
+        .legendary .buff-rarity {
+            background: linear-gradient(135deg, #daa520, #ff8c00);
+        }
+        
+        .mythic .buff-rarity {
+            background: linear-gradient(135deg, #ff4500, #ff6347);
+        }
+        
+        .buff-name {
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+            color: #333;
+            font-weight: bold;
+            padding-right: 45px;
+            line-height: 1.2;
+        }
+        
+        .buff-desc {
+            font-size: 0.7rem;
+            color: #666;
+            min-height: 35px;
+            line-height: 1.3;
+        }
+        
+        .buff-select {
+            margin-top: 4px;
+            text-align: center;
+            color: #b8860b;
+            font-weight: bold;
+            display: none;
+            font-size: 0.7rem;
+        }
+        
+        .buff-card.selected .buff-select {
+            display: block;
+        }
+        
+        .lock-icon {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            color: #d4af37;
+            cursor: pointer;
+            font-size: 0.75rem;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.9);
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .lock-icon.locked {
+            color: #b8860b;
+            background: rgba(184, 134, 11, 0.1);
+            border-color: #b8860b;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            background: linear-gradient(to right, #d4af37, #daa520);
+            color: #333;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.2);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            border: 1px solid rgba(184, 134, 11, 0.5);
+            width: 100%;
+            margin-bottom: 8px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, #daa520, #d4af37);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+        
+        .btn:hover, .btn:active {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
+            color: #333;
+        }
+        
+        .btn:hover::before, .btn:active::before {
+            opacity: 1;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            color: #888;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            border-color: #bbb;
+        }
+        
+        .btn:disabled:hover::before {
+            opacity: 0;
+        }
+        
+        /* 灵力显示 */
+        .spirit-power {
+            font-size: 1.4rem;
+            color: #4682b4;
+            text-align: center;
+            margin: 15px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .spirit-icon {
+            display: inline-block;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #d4af37, #daa520, #4682b4);
+            border-radius: 50%;
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .spirit-icon::after {
+            content: "⚡";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+        }
+        
+        .spirit-per-minute {
+            font-size: 0.8rem;
+            color: #b8860b;
+            background: rgba(212, 175, 55, 0.2);
+            padding: 5px 12px;
+            border-radius: 15px;
+            margin-top: 6px;
+            border: 1px solid rgba(184, 134, 11, 0.3);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .action-buttons .btn {
+            margin-bottom: 0;
+        }
+        
+        .cultivate-btn {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            min-width: auto;
+        }
+        
+        /* 战斗区域 */
+        .monster-battle {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 12px;
+            border: 2px solid #d4af37;
+            position: relative;
+        }
+        
+        .monster-name {
+            font-size: 1.2rem;
+            color: #dc143c;
+            text-align: center;
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-shadow: 0 2px 5px rgba(220, 20, 60, 0.2);
+        }
+        
+        .monster-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        
+        .stat {
+            text-align: center;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            min-width: auto;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+        }
+        
+        .stat-value {
+            font-size: 1rem;
+            color: #4682b4;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .battle-info {
+            height: 70px;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 8px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 0.85rem;
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 进度条 */
+        .progress-container {
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #b8860b;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #d4af37, #daa520);
+            width: 0%;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+        
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #333;
+            font-weight: bold;
+            font-size: 0.85rem;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+        }
+        
+        .refresh-counter {
+            background: rgba(212, 175, 55, 0.2);
+            padding: 8px 12px;
+            border-radius: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            border: 1px solid rgba(184, 134, 11, 0.3);
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 15px;
+            margin-top: 12px;
+            color: #666;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(212, 175, 55, 0.3);
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .cultivation-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(212, 175, 55, 0.1);
+            padding: 6px 10px;
+            border-radius: 15px;
+            color: #666;
+            font-size: 0.8rem;
+            border: 1px solid rgba(184, 134, 11, 0.2);
+        }
+        
+        .info-value {
+            color: #4682b4;
+            font-weight: bold;
+        }
+        
+        .cultivation-stage {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding: 10px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .stage-info {
+            text-align: center;
+        }
+        
+        .stage-name {
+            font-size: 1rem;
+            color: #b8860b;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .stage-level {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        /* 人物属性卡片 */
+        .character-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .stat-card {
+            flex: 1;
+            min-width: auto;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+        }
+        
+        .stat-card-title {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        
+        .stat-card-value {
+            font-size: 1.1rem;
+            color: #b8860b;
+            font-weight: bold;
+        }
+        
+        .stat-card-add {
+            margin-top: 6px;
+            padding: 5px 10px;
+            background: linear-gradient(to right, #d4af37, #daa520);
+            color: #333;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .stat-card-add:hover {
+            background: linear-gradient(to right, #daa520, #d4af37);
+        }
+        
+        /* 怪物选择 */
+        .monster-selection {
+            display: flex;
+            overflow-x: auto;
+            gap: 8px;
+            margin-top: 10px;
+            padding-bottom: 6px;
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .monster-option {
+            flex: 0 0 auto;
+            min-width: 90px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid rgba(212, 175, 55, 0.7);
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .monster-option:hover, .monster-option:active {
+            border-color: #b8860b;
+            transform: translateY(-3px);
+        }
+        
+        .monster-option.selected {
+            border-color: #daa520;
+            background: rgba(218, 165, 32, 0.1);
+        }
+        
+        .monster-level {
+            font-size: 0.85rem;
+            color: #b8860b;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .monster-reward {
+            font-size: 0.75rem;
+            color: #666;
+        }
+        
+        /* 复活界面 */
+        .resurrect-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            border-radius: 12px;
+        }
+        
+        .resurrect-title {
+            font-size: 1.2rem;
+            color: #dc143c;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        
+        .resurrect-timer {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #b8860b;
+            text-align: center;
+        }
+        
+        /* 属性加点 */
+        .attribute-points {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .attribute-title {
+            font-size: 1rem;
+            color: #b8860b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .attribute-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .attribute-item {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .attribute-name {
+            font-weight: bold;
+            color: #b8860b;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+        
+        .attribute-value {
+            color: #4682b4;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .attribute-cost {
+            color: #daa520;
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+        
+        .attribute-add {
+            margin-top: 6px;
+            padding: 6px 10px;
+            background: linear-gradient(to right, #d4af37, #daa520);
+            color: #333;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .crit-text {
+            animation: critAnimation 0.5s ease-in-out;
+            color: #dc143c;
+            font-weight: bold;
+        }
+        
+        .gold-border {
+            border: 2px solid #d4af37;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+            background: rgba(212, 175, 55, 0.05);
+        }
+        
+        .gold-text {
+            color: #daa520;
+            font-weight: bold;
+        }
+        
+        /* 特殊属性 */
+        .special-attributes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .special-attribute {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .special-name {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .special-value {
+            font-size: 0.9rem;
+            color: #b8860b;
+            font-weight: bold;
+        }
+        
+        /* 装备系统样式 - 优化后的布局 */
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .equipment-slot {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            padding: 12px 8px;
+            text-align: center;
+            border: 2px dashed rgba(184, 134, 11, 0.5);
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .equipment-slot:hover, .equipment-slot:active {
+            border-color: #b8860b;
+            background: rgba(184, 134, 11, 0.1);
+        }
+        
+        .equipment-slot.filled {
+            border: 2px solid #d4af37;
+            background: rgba(212, 175, 55, 0.1);
+        }
+        
+        .equipment-icon {
+            font-size: 1.6rem;
+            color: #b8860b;
+            margin-bottom: 6px;
+        }
+        
+        .equipment-name {
+            font-size: 0.8rem;
+            color: #333;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+        
+        .equipment-stats {
+            font-size: 0.7rem;
+            color: #666;
+        }
+        
+        .inventory-container {
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .inventory-title {
+            color: #b8860b;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
+        }
+        
+        .inventory-item {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .inventory-item:hover, .inventory-item:active {
+            border-color: #b8860b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.1);
+        }
+        
+        .inventory-item.selected {
+            border-color: #daa520;
+            background: rgba(218, 165, 32, 0.1);
+        }
+        
+        .item-rarity {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            font-size: 0.65rem;
+            padding: 1px 5px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .item-name {
+            color: #333;
+            font-size: 0.75rem;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+        
+        .item-stats {
+            color: #4682b4;
+            font-size: 0.7rem;
+            margin-bottom: 2px;
+        }
+        
+        .item-type {
+            color: #666;
+            font-size: 0.65rem;
+        }
+        
+        .item-level {
+            color: #daa520;
+            font-size: 0.65rem;
+            margin-top: 2px;
+        }
+        
+        .equipment-details {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            display: none;
+        }
+        
+        .equipment-details.show {
+            display: block;
+        }
+        
+        .equipment-details-title {
+            color: #b8860b;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .equipment-details-content {
+            color: #666;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        
+        .monster-scroll {
+            display: flex;
+            overflow-x: auto;
+            gap: 8px;
+            padding-bottom: 6px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* 自动战斗按钮 */
+        .auto-battle-btn {
+            background: linear-gradient(to right, #2e8b57, #3cb371);
+            color: white;
+        }
+        
+        .auto-battle-btn.active {
+            background: linear-gradient(to right, #dc143c, #ff4500);
+            color: white;
+        }
+        
+        /* 移动端底部导航 */
+        .mobile-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-top: 2px solid #d4af37;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            z-index: 1000;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.7rem;
+            color: #666;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .nav-item.active {
+            background: rgba(212, 175, 55, 0.2);
+            color: #b8860b;
+        }
+        
+        .nav-item i {
+            font-size: 1.2rem;
+            margin-bottom: 3px;
+        }
+        
+        /* 修仙背景装饰 */
+        .taoist-symbol {
+            position: absolute;
+            opacity: 0.05;
+            font-size: 150px;
+            color: #d4af37;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .symbol-1 {
+            top: 40px;
+            left: 20px;
+            transform: rotate(15deg);
+        }
+        
+        .symbol-2 {
+            bottom: 40px;
+            right: 20px;
+            transform: rotate(-15deg);
+        }
+        
+        /* 通知消息 */
+        .notification {
+            position: fixed;
+            top: 15px;
+            left: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #d4af37;
+            border-radius: 8px;
+            padding: 12px 15px;
+            max-width: 100%;
+            transform: translateY(-150%);
+            transition: transform 0.4s ease;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            font-size: 0.85rem;
+        }
+        
+        .notification.show {
+            transform: translateY(0);
+        }
+        
+        .notification-title {
+            color: #b8860b;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .notification-content {
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: #666;
+        }
+        
+        /* 动画效果 */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(218, 165, 32, 0.4); }
+            70% { box-shadow: 0 0 0 12px rgba(218, 165, 32, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(218, 165, 32, 0); }
+        }
+        
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 10px rgba(255, 69, 0, 0.4); }
+            100% { box-shadow: 0 0 20px rgba(255, 69, 0, 0.8); }
+        }
+        
+        @keyframes critAnimation {
+            0% { transform: scale(1); text-shadow: 0 0 0 rgba(220, 20, 60, 0); }
+            50% { transform: scale(1.5); text-shadow: 0 0 20px rgba(220, 20, 60, 0.5); }
+            100% { transform: scale(1); text-shadow: 0 0 0 rgba(220, 20, 60, 0); }
+        }
+        
+        @keyframes level-up {
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.5; }
+        }
+        
+        /* 加载动画 */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .loading.show {
+            display: flex;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(212, 175, 55, 0.2);
+            border-top: 4px solid #b8860b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 存档提示 */
+        .save-notification {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(70, 130, 180, 0.1);
+            border: 1px solid #4682b4;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 0.75rem;
+            color: #4682b4;
+            z-index: 999;
+            display: none;
+        }
+        
+        .save-notification.show {
+            display: block;
+            animation: fadeOut 2s ease-in-out 1s forwards;
+        }
+        
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; display: none; }
+        }
+        
+        /* 自动回收设置 */
+        .auto-recycle-settings {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .auto-recycle-title {
+            color: #b8860b;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .recycle-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .recycle-option {
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .recycle-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .recycle-select {
+            width: 100%;
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            background: white;
+            font-size: 0.85rem;
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 767px) {
+            .game-wrapper {
+                border-radius: 10px;
+                margin-bottom: 60px;
+            }
+            
+            .panel {
+                padding: 12px;
+            }
+            
+            .btn {
+                padding: 12px 16px;
+                font-size: 0.95rem;
+            }
+            
+            .monster-option {
+                min-width: 100px;
+                padding: 12px;
+            }
+            
+            .stat {
+                padding: 10px;
+            }
+            
+            .buff-card {
+                min-height: 85px;
+                padding: 8px;
+            }
+            
+            .equipment-grid {
+                gap: 8px;
+            }
+            
+            .equipment-slot {
+                min-height: 80px;
+                padding: 10px 6px;
+            }
+            
+            .inventory-grid {
+                grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+            }
+        }
+        
+        /* 触摸反馈 */
+        .touch-feedback {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: inherit;
+            background: rgba(212, 175, 55, 0.1);
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        
+        .btn:active .touch-feedback,
+        .buff-card:active .touch-feedback,
+        .monster-option:active .touch-feedback,
+        .inventory-item:active .touch-feedback {
+            opacity: 1;
+        }
+        
+        /* 长按提示 */
+        .long-press-hint {
+            position: absolute;
+            bottom: -18px;
+            left: 0;
+            right: 0;
+            font-size: 0.65rem;
+            color: #999;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .equipment-slot:hover .long-press-hint,
+        .inventory-item:hover .long-press-hint {
+            opacity: 1;
+        }
+        
+        /* 选中天赋容器 */
+        .selected-buffs-container {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .selected-buffs-title {
+            color: #b8860b;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .selected-buffs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        
+        /* 战斗状态指示器 */
+        .battle-status {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .status-item {
+            text-align: center;
+        }
+        
+        .status-label {
+            font-size: 0.75rem;
+            color: #666;
+        }
+        
+        .status-value {
+            font-size: 0.9rem;
+            color: #4682b4;
+            font-weight: bold;
+        }
+        
+        /* 存档管理 */
+        .save-manager {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .save-manager-title {
+            color: #b8860b;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .save-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        /* 新增：重置游戏按钮 */
+        .reset-btn {
+            background: linear-gradient(to right, #dc143c, #ff4500);
+            color: white;
+        }
+        
+        /* 新增：当前境界显示 */
+        .current-stage-display {
+            display: inline-block;
+            background: rgba(212, 175, 55, 0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            color: #b8860b;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        /* 新增：境界修炼进度 */
+        .cultivation-progress-container {
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .cultivation-progress-bar {
+            height: 20px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .cultivation-progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #8a2be2, #9370db);
+            width: 0%;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+        
+        .cultivation-progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #333;
+            font-weight: bold;
+            font-size: 0.85rem;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+        }
+        
+        /* 新增：装备属性展示 */
+        .equipment-bonus-display {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(70, 130, 180, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(70, 130, 180, 0.3);
+        }
+        
+        .equipment-bonus-title {
+            color: #4682b4;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .equipment-bonus-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        
+        .equipment-bonus-item {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid rgba(70, 130, 180, 0.3);
+        }
+        
+        .equipment-bonus-name {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        
+        .equipment-bonus-value {
+            font-size: 0.9rem;
+            color: #4682b4;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- 加载动画 -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div style="color: #b8860b; font-size: 1rem;">加载修仙世界...</div>
+    </div>
+    
+    <!-- 存档提示 -->
+    <div class="save-notification" id="save-notification">
+        <i class="fas fa-save"></i> 游戏已自动保存
+    </div>
+    
+    <!-- 通知消息 -->
+    <div class="notification" id="notification">
+        <div class="notification-title"><i class="fas fa-info-circle"></i> <span id="notification-title">系统提示</span></div>
+        <div class="notification-content" id="notification-content">请选择两个天赋开始修仙之旅</div>
+    </div>
+    
+    <div class="taoist-symbol symbol-1">☯</div>
+    <div class="taoist-symbol symbol-2">☯</div>
+    
+    <div class="container">
+        <div class="game-wrapper">
+            <header>
+                <h1>修仙模拟器 v4.3 - 装备系统优化版</h1>
+                <p class="subtitle">炼气化神 · 炼神还虚 · 炼虚合道 · 渡劫飞升</p>
+            </header>
+            
+            <div class="game-container">
+                <div class="main-content">
+                    <!-- 天赋选择面板 -->
+                    <div class="panel" id="talent-panel">
+                        <div class="tab-container">
+                            <div class="tab active" data-tab="talents">天赋选择</div>
+                            <div class="tab" data-tab="equipment">装备系统</div>
+                            <div class="tab" data-tab="recycle">自动回收</div>
+                            <div class="tab" data-tab="saves">存档管理</div>
+                        </div>
+                        
+                        <!-- 天赋选择内容 -->
+                        <div class="tab-content active" id="talents-content">
+                            <h2 class="panel-title"><i class="fas fa-magic"></i> 开局天赋</h2>
+                            <p style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">请从以下天赋中选择两个，刷新次数: <span id="refresh-count">10</span> 次</p>
+                            
+                            <div class="buff-container" id="buff-container">
+                                <!-- Buffs will be generated here -->
+                            </div>
+                            
+                            <div class="action-buttons">
+                                <button class="btn" id="refresh-btn"><i class="fas fa-sync-alt"></i> 刷新天赋</button>
+                                <button class="btn" id="start-btn" disabled><i class="fas fa-play"></i> 开始修仙</button>
+                                <button class="btn reset-btn" id="reset-game-btn"><i class="fas fa-redo"></i> 重置游戏</button>
+                            </div>
+                            
+                            <div class="refresh-counter">
+                                <i class="fas fa-redo"></i> 剩余刷新次数: <span id="refresh-counter">10</span>次
+                            </div>
+                            
+                            <div class="cultivation-stage">
+                                <div class="stage-info">
+                                    <div class="stage-name">已选天赋</div>
+                                    <div class="stage-level"><span id="selected-buffs-count">0</span>/2</div>
+                                </div>
+                                <div class="stage-info">
+                                    <div class="stage-name">初始境界</div>
+                                    <div class="stage-level">炼气初期</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 装备系统内容 - 优化版 -->
+                        <div class="tab-content" id="equipment-content">
+                            <h2 class="panel-title"><i class="fas fa-shield-alt"></i> 装备系统 v4.3</h2>
+                            <p style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">穿戴装备提升属性，击败怪物有几率掉落装备，怪物越强掉落越好！</p>
+                            
+                            <!-- 装备栏 - 优化后的布局 -->
+                            <div class="equipment-grid" id="equipment-grid">
+                                <!-- 武器槽 -->
+                                <div class="equipment-slot" data-slot="weapon">
+                                    <div class="equipment-icon">⚔️</div>
+                                    <div class="equipment-name">武器</div>
+                                    <div class="equipment-stats">未装备</div>
+                                    <div class="long-press-hint">长按脱下</div>
+                                </div>
+                                <!-- 护甲槽 -->
+                                <div class="equipment-slot" data-slot="armor">
+                                    <div class="equipment-icon">🛡️</div>
+                                    <div class="equipment-name">护甲</div>
+                                    <div class="equipment-stats">未装备</div>
+                                    <div class="long-press-hint">长按脱下</div>
+                                </div>
+                                <!-- 手槽 -->
+                                <div class="equipment-slot" data-slot="hand">
+                                    <div class="equipment-icon">✋</div>
+                                    <div class="equipment-name">手</div>
+                                    <div class="equipment-stats">未装备</div>
+                                    <div class="long-press-hint">长按脱下</div>
+                                </div>
+                                <!-- 戒指槽 -->
+                                <div class="equipment-slot" data-slot="ring">
+                                    <div class="equipment-icon">💍</div>
+                                    <div class="equipment-name">戒指</div>
+                                    <div class="equipment-stats">未装备</div>
+                                    <div class="long-press-hint">长按脱下</div>
+                                </div>
+                                <!-- 项链槽 -->
+                                <div class="equipment-slot" data-slot="necklace">
+                                    <div class="equipment-icon">📿</div>
+                                    <div class="equipment-name">项链</div>
+                                    <div class="equipment-stats">未装备</div>
+                                    <div class="long-press-hint">长按脱下</div>
+                                </div>
+                                <!-- 鞋槽 -->
+                                <div class="equipment-slot" data-slot="shoe">
+                                    <div class="equipment-icon">👟</div>
+                                    <div class="equipment-name">鞋</div>
+                                    <div class="equipment-stats">未装备</div>
+                                    <div class="long-press-hint">长按脱下</div>
+                                </div>
+                            </div>
+                            
+                            <!-- 装备详情 -->
+                            <div class="equipment-details" id="equipment-details">
+                                <div class="equipment-details-title">
+                                    <i class="fas fa-info-circle"></i> 装备详情
+                                </div>
+                                <div class="equipment-details-content" id="equipment-details-content">
+                                    点击装备查看详细信息
+                                </div>
+                            </div>
+                            
+                            <!-- 装备加成显示 -->
+                            <div class="equipment-bonus-display">
+                                <div class="equipment-bonus-title">
+                                    <i class="fas fa-gem"></i> 当前装备加成
+                                </div>
+                                <div class="equipment-bonus-grid">
+                                    <div class="equipment-bonus-item">
+                                        <div class="equipment-bonus-name">攻击加成</div>
+                                        <div class="equipment-bonus-value" id="total-attack-bonus">0</div>
+                                    </div>
+                                    <div class="equipment-bonus-item">
+                                        <div class="equipment-bonus-name">防御加成</div>
+                                        <div class="equipment-bonus-value" id="total-defense-bonus">0</div>
+                                    </div>
+                                    <div class="equipment-bonus-item">
+                                        <div class="equipment-bonus-name">生命加成</div>
+                                        <div class="equipment-bonus-value" id="total-hp-bonus">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 背包 -->
+                            <div class="inventory-container">
+                                <div class="inventory-title">
+                                    <i class="fas fa-backpack"></i> 背包 ( <span id="inventory-count">0</span> / 30 )
+                                </div>
+                                <div class="inventory-grid" id="inventory-grid">
+                                    <!-- 背包物品将在这里显示 -->
+                                </div>
+                                <p style="text-align: center; color: #999; margin-top: 8px; font-size: 0.85rem;">双击装备穿戴，长按装备槽脱下</p>
+                            </div>
+                            
+                            <div class="action-buttons">
+                                <button class="btn" id="sell-equipment-btn" disabled><i class="fas fa-coins"></i> 出售选中装备</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 自动回收内容 -->
+                        <div class="tab-content" id="recycle-content">
+                            <h2 class="panel-title"><i class="fas fa-recycle"></i> 自动回收设置</h2>
+                            <p style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">自动回收不需要的装备，转化为灵力</p>
+                            
+                            <div class="auto-recycle-settings">
+                                <div class="auto-recycle-title">
+                                    <i class="fas fa-cog"></i> 回收设置
+                                </div>
+                                
+                                <div class="recycle-options">
+                                    <div class="recycle-option">
+                                        <div class="recycle-label">
+                                            <i class="fas fa-level-up-alt"></i> 等级低于
+                                        </div>
+                                        <select class="recycle-select" id="recycle-level">
+                                            <option value="0">关闭</option>
+                                            <option value="5" selected>5级</option>
+                                            <option value="10">10级</option>
+                                            <option value="15">15级</option>
+                                            <option value="20">20级</option>
+                                            <option value="25">25级</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="recycle-option">
+                                        <div class="recycle-label">
+                                            <i class="fas fa-gem"></i> 品质低于
+                                        </div>
+                                        <select class="recycle-select" id="recycle-rarity">
+                                            <option value="common" selected>普通</option>
+                                            <option value="rare">稀有</option>
+                                            <option value="epic">史诗</option>
+                                            <option value="legendary">传说</option>
+                                            <option value="none">关闭</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-top: 12px; padding: 8px; background: rgba(255, 255, 255, 0.9); border-radius: 6px; font-size: 0.85rem; color: #666;">
+                                    <i class="fas fa-info-circle"></i> 自动回收将在击败怪物获得装备时自动执行，回收装备将转化为原价70%的灵力。
+                                </div>
+                            </div>
+                            
+                            <div class="auto-recycle-settings">
+                                <div class="auto-recycle-title">
+                                    <i class="fas fa-history"></i> 回收统计
+                                </div>
+                                <div class="recycle-options">
+                                    <div class="recycle-option">
+                                        <div class="recycle-label">
+                                            <i class="fas fa-coins"></i> 累计回收灵力
+                                        </div>
+                                        <div style="font-size: 1.1rem; color: #b8860b; font-weight: bold; text-align: center;" id="total-recycled-spirit">0</div>
+                                    </div>
+                                    
+                                    <div class="recycle-option">
+                                        <div class="recycle-label">
+                                            <i class="fas fa-trash"></i> 累计回收装备
+                                        </div>
+                                        <div style="font-size: 1.1rem; color: #b8860b; font-weight: bold; text-align: center;" id="total-recycled-items">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="action-buttons">
+                                <button class="btn" id="manual-recycle-btn"><i class="fas fa-broom"></i> 立即回收背包</button>
+                                <button class="btn" id="save-settings-btn"><i class="fas fa-save"></i> 保存设置</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 存档管理内容 -->
+                        <div class="tab-content" id="saves-content">
+                            <h2 class="panel-title"><i class="fas fa-save"></i> 存档管理</h2>
+                            <p style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">管理游戏存档，支持复制粘贴存档数据</p>
+                            
+                            <div class="save-manager">
+                                <div class="save-manager-title">
+                                    <i class="fas fa-database"></i> 当前存档信息
+                                </div>
+                                <div class="recycle-options">
+                                    <div class="recycle-option">
+                                        <div class="recycle-label">
+                                            <i class="fas fa-clock"></i> 最后保存时间
+                                        </div>
+                                        <div style="font-size: 0.9rem; color: #4682b4; text-align: center;" id="save-time">未保存</div>
+                                    </div>
+                                    
+                                    <div class="recycle-option">
+                                        <div class="recycle-label">
+                                            <i class="fas fa-gamepad"></i> 游戏版本
+                                        </div>
+                                        <div style="font-size: 0.9rem; color: #4682b4; text-align: center;" id="save-version">v4.3</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="save-manager">
+                                <div class="save-manager-title">
+                                    <i class="fas fa-copy"></i> 复制存档
+                                </div>
+                                <p style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">将当前游戏进度复制到剪贴板</p>
+                                <button class="btn" id="copy-save-btn"><i class="fas fa-copy"></i> 复制存档数据</button>
+                                <div style="margin-top: 8px; font-size: 0.75rem; color: #666; text-align: center;" id="copy-status"></div>
+                            </div>
+                            
+                            <div class="save-manager">
+                                <div class="save-manager-title">
+                                    <i class="fas fa-paste"></i> 粘贴存档
+                                </div>
+                                <p style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">从剪贴板粘贴游戏进度</p>
+                                <button class="btn" id="paste-save-btn"><i class="fas fa-paste"></i> 粘贴存档数据</button>
+                                <div style="margin-top: 8px; font-size: 0.75rem; color: #666; text-align: center;" id="paste-status"></div>
+                            </div>
+                            
+                            <div class="action-buttons">
+                                <button class="btn" id="quick-save-btn"><i class="fas fa-save"></i> 快速保存</button>
+                                <button class="btn" id="load-last-btn"><i class="fas fa-folder-open"></i> 加载上次存档</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 属性面板 -->
+                    <div class="panel" id="attribute-panel" style="display:none">
+                        <h2 class="panel-title"><i class="fas fa-user"></i> 人物属性</h2>
+                        
+                        <div class="character-stats">
+                            <div class="stat-card">
+                                <div class="stat-card-title">境界</div>
+                                <div class="stat-card-value" id="character-stage">炼气初期</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-card-title">等级</div>
+                                <div class="stat-card-value" id="character-level">1</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-card-title">生命值</div>
+                                <div class="stat-card-value" id="character-hp">200/200</div>
+                                <button class="stat-card-add" data-attr="hp">+</button>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-card-title">攻击力</div>
+                                <div class="stat-card-value" id="character-attack">50</div>
+                                <button class="stat-card-add" data-attr="attack">+</button>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-card-title">防御力</div>
+                                <div class="stat-card-value" id="character-defense">20</div>
+                                <button class="stat-card-add" data-attr="defense">+</button>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-card-title">暴击率</div>
+                                <div class="stat-card-value" id="character-crit-rate">5%</div>
+                                <button class="stat-card-add" data-attr="critRate">+</button>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-card-title">暴击伤害</div>
+                                <div class="stat-card-value" id="character-crit-dmg">150%</div>
+                                <button class="stat-card-add" data-attr="critDmg">+</button>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-card-title">闪避率</div>
+                                <div class="stat-card-value" id="character-dodge">5%</div>
+                                <button class="stat-card-add" data-attr="dodge">+</button>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-card-title">体质</div>
+                                <div class="stat-card-value" id="character-constitution">10</div>
+                                <button class="stat-card-add" data-attr="constitution">+</button>
+                            </div>
+                        </div>
+                        
+                        <div style="margin: 12px 0; padding: 8px; background: rgba(212, 175, 55, 0.1); border-radius: 8px; font-size: 0.85rem; color: #666;">
+                            <i class="fas fa-info-circle"></i> 体质效果: 每点体质提升1%全属性
+                        </div>
+                        
+                        <!-- 装备加成显示 -->
+                        <div class="gold-border">
+                            <div class="attribute-title">
+                                <i class="fas fa-gem gold-text"></i> 装备加成
+                            </div>
+                            <div class="attribute-grid">
+                                <div class="attribute-item">
+                                    <div class="attribute-name">
+                                        <span>武器加成</span>
+                                        <span class="attribute-value" id="equipment-attack-bonus">0</span>
+                                    </div>
+                                    <div class="attribute-cost">攻击力提升</div>
+                                </div>
+                                <div class="attribute-item">
+                                    <div class="attribute-name">
+                                        <span>护甲加成</span>
+                                        <span class="attribute-value" id="equipment-defense-bonus">0</span>
+                                    </div>
+                                    <div class="attribute-cost">防御力提升</div>
+                                </div>
+                                <div class="attribute-item">
+                                    <div class="attribute-name">
+                                        <span>生命加成</span>
+                                        <span class="attribute-value" id="equipment-hp-bonus">0</span>
+                                    </div>
+                                    <div class="attribute-cost">生命值提升</div>
+                                </div>
+                                <div class="attribute-item">
+                                    <div class="attribute-name">
+                                        <span>套装效果</span>
+                                        <span class="attribute-value" id="set-bonus">无</span>
+                                    </div>
+                                    <div class="attribute-cost">特殊效果</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="gold-border">
+                            <div class="attribute-title">
+                                <i class="fas fa-plus-circle gold-text"></i> 属性加点
+                                <span style="margin-left: auto;">可用灵力: <span class="gold-text" id="available-spirit">0</span></span>
+                            </div>
+                            <div class="attribute-grid">
+                                <div class="attribute-item">
+                                    <div class="attribute-name">
+                                        <span>攻击力</span>
+                                        <span class="attribute-value" id="attack-value">50</span>
+                                    </div>
+                                    <div class="attribute-cost">消耗: <span class="gold-text" id="attack-cost">100</span> 灵力</div>
+                                    <button class="attribute-add" data-attr="attack">提升</button>
+                                </div>
+                                <div class="attribute-item">
+                                    <div class="attribute-name">
+                                        <span>防御力</span>
+                                        <span class="attribute-value" id="defense-value">20</span>
+                                    </div>
+                                    <div class="attribute-cost">消耗: <span class="gold-text" id="defense-cost">100</span> 灵力</div>
+                                    <button class="attribute-add" data-attr="defense">提升</button>
+                                </div>
+                                <div class="attribute-item">
+                                    <div class="attribute-name">
+                                        <span>生命值</span>
+                                        <span class="attribute-value" id="hp-value">200</span>
+                                    </div>
+                                    <div class="attribute-cost">消耗: <span class="gold-text" id="hp-cost">100</span> 灵力</div>
+                                    <button class="attribute-add" data-attr="hp">提升</button>
+                                </div>
+                                <div class="attribute-item">
+                                    <div class="attribute-name">
+                                        <span>体质</span>
+                                        <span class="attribute-value" id="constitution-value">10</span>
+                                    </div>
+                                    <div class="attribute-cost">消耗: <span class="gold-text" id="constitution-cost">200</span> 灵力</div>
+                                    <button class="attribute-add" data-attr="constitution">提升</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 已选天赋显示 -->
+                        <div class="selected-buffs-container">
+                            <div class="selected-buffs-title">
+                                <i class="fas fa-star"></i> 已选天赋
+                            </div>
+                            <div class="selected-buffs-grid" id="selected-buffs-grid">
+                                <!-- 已选天赋将在这里显示 -->
+                            </div>
+                        </div>
+                        
+                        <div class="special-attributes">
+                            <div class="special-attribute">
+                                <div class="special-name">吸血率</div>
+                                <div class="special-value" id="character-lifeSteal">0%</div>
+                            </div>
+                            <div class="special-attribute">
+                                <div class="special-name">连击率</div>
+                                <div class="special-value" id="character-combo">0%</div>
+                            </div>
+                            <div class="special-attribute">
+                                <div class="special-name">修炼速度</div>
+                                <div class="special-value" id="character-cultivation-speed">100%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="side-content">
+                    <!-- 修仙境界面板 -->
+                    <div class="panel">
+                        <h2 class="panel-title"><i class="fas fa-fire"></i> 修仙境界
+                            <span class="current-stage-display" id="current-stage-display">炼气初期</span>
+                        </h2>
+                        <div class="spirit-power">
+                            <span class="spirit-icon"></span> 
+                            <div>
+                                <div>灵力: <span id="spirit-power">0</span></div>
+                                <div class="spirit-per-minute">每5秒收益: <span id="spirit-per-minute">0</span></div>
+                            </div>
+                        </div>
+                        
+                        <!-- 等级进度 -->
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>等级进度</span>
+                                <span><span id="stage-progress-value">0</span>%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                                <div class="progress-text" id="progress-text">等级 1 · 0%</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 境界修炼进度 -->
+                        <div class="cultivation-progress-container">
+                            <div class="progress-label">
+                                <span>境界修炼进度</span>
+                                <span><span id="cultivation-progress-value">0</span>%</span>
+                            </div>
+                            <div class="cultivation-progress-bar">
+                                <div class="cultivation-progress-fill" id="cultivation-progress-fill" style="width: 0%"></div>
+                                <div class="cultivation-progress-text" id="cultivation-progress-text">炼气初期 · 0%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <button class="btn cultivate-btn" id="cultivate-btn"><i class="fas fa-meditation"></i> 闭关修炼</button>
+                            <button class="btn" id="reset-game-btn-2" style="display:none"><i class="fas fa-redo"></i> 重置游戏</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 战斗区域 -->
+                    <div class="panel monster-battle" id="monster-battle">
+                        <h2 class="panel-title"><i class="fas fa-dragon"></i> 妖兽挑战</h2>
+                        
+                        <div class="monster-scroll" id="monster-selection">
+                            <!-- Monster options will be generated here -->
+                        </div>
+                        
+                        <div class="monster-name" id="monster-name">赤焰妖虎</div>
+                        <div class="monster-stats">
+                            <div class="stat">
+                                <div class="stat-value" id="monster-hp">400</div>
+                                <div class="stat-label">气血</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value" id="monster-attack">40</div>
+                                <div class="stat-label">攻击</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value" id="monster-defense">10</div>
+                                <div class="stat-label">防御</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value" id="monster-cultivation">炼气中期</div>
+                                <div class="stat-label">修为</div>
+                            </div>
+                        </div>
+                        
+                        <div class="battle-status">
+                            <div class="status-item">
+                                <div class="status-label">你的生命</div>
+                                <div class="status-value" id="player-hp-display">200/200</div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-label">怪物生命</div>
+                                <div class="status-value" id="monster-hp-display">400/400</div>
+                            </div>
+                        </div>
+                        
+                        <div class="battle-info" id="battle-info">
+                            战斗尚未开始...
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <button class="btn battle-btn" data-action="attack" id="attack-btn"><i class="fas fa-fist-raised"></i> 攻击</button>
+                            <button class="btn auto-battle-btn" id="auto-battle-btn"><i class="fas fa-robot"></i> 自动战斗</button>
+                        </div>
+                        
+                        <div class="resurrect-overlay" id="resurrect-overlay" style="display:none">
+                            <div class="resurrect-title">角色已阵亡</div>
+                            <div class="resurrect-timer">复活倒计时: <span id="resurrect-timer">5</span>秒</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 页脚信息 -->
+                    <div class="footer">
+                        <p>修仙模拟器 | 当前版本: 4.3 - 装备系统优化版</p>
+                        <div class="cultivation-info">
+                            <div class="info-item">
+                                <i class="fas fa-bolt"></i> 每5秒灵力: <span class="info-value" id="current-reward">0</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-shield-alt"></i> 当前境界: <span class="info-value" id="current-stage">炼气初期</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-dragon"></i> 妖兽击败: <span class="info-value" id="monster-defeated">0</span>
+                            </div>
+                        </div>
+                        <div class="cultivation-info" style="margin-top:8px">
+                            <div class="info-item">
+                                <i class="fas fa-clock"></i> 游戏时间: <span class="info-value" id="game-time">00:00:00</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-save"></i> 自动保存: <span class="info-value" id="last-save">--:--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 移动端底部导航 -->
+    <div class="mobile-nav">
+        <div class="nav-item active" data-target="talent-panel">
+            <i class="fas fa-magic"></i>
+            <span>天赋</span>
+        </div>
+        <div class="nav-item" data-target="attribute-panel">
+            <i class="fas fa-user"></i>
+            <span>属性</span>
+        </div>
+        <div class="nav-item" data-target="cultivate-btn">
+            <i class="fas fa-meditation"></i>
+            <span>修炼</span>
+        </div>
+        <div class="nav-item" data-target="monster-battle">
+            <i class="fas fa-dragon"></i>
+            <span>妖兽</span>
+        </div>
+        <div class="nav-item" data-target="equipment-content">
+            <i class="fas fa-shield-alt"></i>
+            <span>装备</span>
+        </div>
+    </div>
+
+    <script>
+        // ============================
+        // 游戏数据与状态管理
+        // ============================
+        const GameState = {
+            VERSION: '4.3',
+            
+            // 基础资源
+            spiritPower: 0,
+            refreshCount: 10,
+            cultivationStage: '炼气初期',
+            stageProgress: 0,
+            cultivationProgress: 0,
+            selectedBuffs: [],
+            buffs: [],
+            
+            // 角色属性
+            character: {
+                baseHp: 200,
+                baseAttack: 50,
+                baseDefense: 20,
+                baseCritRate: 5,
+                baseCritDmg: 150,
+                baseDodge: 5,
+                baseLifeSteal: 0,
+                baseCombo: 0,
+                baseConstitution: 10,
+                hp: 200,
+                maxHp: 200,
+                attack: 50,
+                defense: 20,
+                critRate: 5,
+                critDmg: 150,
+                dodge: 5,
+                lifeSteal: 0,
+                combo: 0,
+                constitution: 10,
+                isAlive: true,
+                experience: 0,
+                level: 1
+            },
+            
+            // 怪物数据
+            monster: {
+                name: '赤焰妖虎',
+                hp: 400,
+                maxHp: 400,
+                attack: 40,
+                defense: 10,
+                cultivation: '炼气中期',
+                rewardMin: 30,
+                rewardMax: 50,
+                level: 1
+            },
+            
+            // 属性加点消耗
+            attributeCosts: {
+                attack: 100,
+                defense: 100,
+                hp: 100,
+                critRate: 200,
+                critDmg: 200,
+                dodge: 200,
+                lifeSteal: 300,
+                combo: 300,
+                constitution: 200
+            },
+            
+            // 游戏状态
+            cultivationInterval: null,
+            inBattle: false,
+            monsterDefeated: 0,
+            stageReward: 10,
+            autoBattleInterval: null,
+            autoBattleActive: false,
+            gameTime: 0, // 游戏时间（秒）
+            lastSaveTime: null,
+            
+            // 装备系统数据 - 扩展后的装备类型
+            equipment: {
+                weapon: null,
+                armor: null,
+                hand: null,
+                ring: null,
+                necklace: null,
+                shoe: null
+            },
+            inventory: [], // 背包物品
+            selectedInventoryItem: null, // 选中的背包物品
+            
+            // 自动回收设置
+            autoRecycle: {
+                enabled: true,
+                levelThreshold: 5,
+                rarityThreshold: 'common',
+                totalRecycledSpirit: 0,
+                totalRecycledItems: 0
+            },
+            
+            // 游戏设置
+            settings: {
+                autosaveEnabled: true,
+                animationEnabled: true,
+                saveInterval: 30000 // 30秒自动保存
+            }
+        };
+        
+        // ============================
+        // 游戏常量
+        // ============================
+        const CULTIVATION_STAGES = [
+            '炼气初期', '炼气中期', '炼气后期',
+            '筑基初期', '筑基中期', '筑基后期',
+            '金丹初期', '金丹中期', '金丹后期',
+            '元婴初期', '元婴中期', '元婴后期',
+            '化神初期', '化神中期', '化神后期',
+            '炼虚初期', '炼虚中期', '炼虚后期',
+            '合道初期', '合道中期', '合道后期',
+            '渡劫初期', '渡劫中期', '渡劫后期',
+            '飞升期'
+        ];
+        
+        const MONSTERS_BY_LEVEL = {
+            1: { name: '赤焰妖虎', hp: 400, maxHp: 400, attack: 40, defense: 10, cultivation: '炼气中期', rewardMin: 30, rewardMax: 50 },
+            2: { name: '寒冰巨蟒', hp: 800, maxHp: 800, attack: 70, defense: 20, cultivation: '筑基初期', rewardMin: 60, rewardMax: 100 },
+            3: { name: '雷霆金鹏', hp: 1600, maxHp: 1600, attack: 120, defense: 40, cultivation: '金丹初期', rewardMin: 120, rewardMax: 180 },
+            4: { name: '熔岩巨人', hp: 3200, maxHp: 3200, attack: 200, defense: 80, cultivation: '元婴初期', rewardMin: 240, rewardMax: 360 },
+            5: { name: '九幽蛟龙', hp: 6400, maxHp: 6400, attack: 350, defense: 150, cultivation: '化神初期', rewardMin: 480, rewardMax: 720 },
+            6: { name: '玄冰凤凰', hp: 12800, maxHp: 12800, attack: 600, defense: 300, cultivation: '炼虚初期', rewardMin: 960, rewardMax: 1440 },
+            7: { name: '混沌石灵', hp: 25600, maxHp: 25600, attack: 1000, defense: 500, cultivation: '合道初期', rewardMin: 1920, rewardMax: 2880 },
+            8: { name: '九天神龙', hp: 51200, maxHp: 51200, attack: 1800, defense: 900, cultivation: '渡劫初期', rewardMin: 3840, rewardMax: 5760 },
+            9: { name: '虚空天魔', hp: 102400, maxHp: 102400, attack: 3200, defense: 1600, cultivation: '飞升期', rewardMin: 7680, rewardMax: 11520 }
+        };
+        
+        // 装备类型定义
+        const EQUIPMENT_TYPES = [
+            { id: 'weapon', name: '武器', icon: '⚔️' },
+            { id: 'armor', name: '护甲', icon: '🛡️' },
+            { id: 'hand', name: '手', icon: '✋' },
+            { id: 'ring', name: '戒指', icon: '💍' },
+            { id: 'necklace', name: '项链', icon: '📿' },
+            { id: 'shoe', name: '鞋', icon: '👟' }
+        ];
+        
+        // 装备稀有度
+        const EQUIPMENT_RARITIES = [
+            { id: 'common', name: '普通', color: '#999', weight: 40, multiplier: 1.0 },
+            { id: 'rare', name: '稀有', color: '#4682b4', weight: 30, multiplier: 1.5 },
+            { id: 'epic', name: '史诗', color: '#9370db', weight: 20, multiplier: 2.0 },
+            { id: 'legendary', name: '传说', color: '#daa520', weight: 10, multiplier: 3.0 }
+        ];
+        
+        // 装备属性池
+        const EQUIPMENT_STATS = {
+            weapon: {
+                primary: 'attack',
+                possibleStats: ['attack', 'critRate', 'critDmg', 'lifeSteal']
+            },
+            armor: {
+                primary: 'defense',
+                possibleStats: ['defense', 'hp', 'dodge']
+            },
+            hand: {
+                primary: 'critRate',
+                possibleStats: ['critRate', 'attack', 'defense', 'combo']
+            },
+            ring: {
+                primary: 'critDmg',
+                possibleStats: ['critDmg', 'critRate', 'lifeSteal', 'attack']
+            },
+            necklace: {
+                primary: 'hp',
+                possibleStats: ['hp', 'lifeSteal', 'dodge', 'defense']
+            },
+            shoe: {
+                primary: 'dodge',
+                possibleStats: ['dodge', 'hp', 'defense', 'combo']
+            }
+        };
+        
+        // 装备名称前缀和后缀
+        const EQUIPMENT_PREFIXES = {
+            common: ['普通的', '平凡的', '粗糙的', '简易的'],
+            rare: ['精致的', '优质的', '坚固的', '锋利的'],
+            epic: ['强大的', '稀有的', '珍贵的', '神秘的'],
+            legendary: ['传说的', '神话的', '不朽的', '神圣的']
+        };
+        
+        const EQUIPMENT_SUFFIXES = {
+            weapon: ['剑', '刀', '斧', '杖', '弓'],
+            armor: ['甲', '袍', '衣', '铠', '服'],
+            hand: ['手套', '护手', '拳套', '手甲'],
+            ring: ['戒指', '指环', '戒'],
+            necklace: ['项链', '吊坠', '护符'],
+            shoe: ['靴', '鞋', '履', '足具']
+        };
+        
+        // 天赋池
+        const BUFF_POOL = [
+            // 普通天赋
+            { id: 1, name: '体魄强健', rarity: 'common', desc: '气血上限提升10%', effect: "hp", value: 0.1 },
+            { id: 2, name: '经脉通畅', rarity: 'common', desc: '灵力恢复速度提升15%', effect: "spiritGain", value: 0.15 },
+            { id: 3, name: '悟性提升', rarity: 'common', desc: '修炼速度提升10%', effect: "cultivationSpeed", value: 0.1 },
+            { id: 4, name: '基础剑诀', rarity: 'common', desc: '攻击力提升15%', effect: "attack", value: 0.15 },
+            { id: 5, name: '铁骨铮铮', rarity: 'common', desc: '防御力提升10%', effect: "defense", value: 0.1 },
+            
+            // 稀有天赋
+            { id: 10, name: '五行灵根', rarity: 'rare', desc: '全属性抗性提升20%', effect: "defense", value: 0.2 },
+            { id: 11, name: '御器精通', rarity: 'rare', desc: '攻击力提升30%', effect: "attack", value: 0.3 },
+            { id: 12, name: '神识敏锐', rarity: 'rare', desc: '闪避率提升10%', effect: "dodge", value: 0.1 },
+            { id: 13, name: '剑意初成', rarity: 'rare', desc: '攻击力提升35%', effect: "attack", value: 0.35 },
+            
+            // 史诗天赋
+            { id: 17, name: '九转金丹', rarity: 'epic', desc: '突破成功率提升50%，灵力上限增加30%', effect: "cultivationSpeed", value: 0.5 },
+            { id: 18, name: '剑意凛然', rarity: 'epic', desc: '攻击力提升70%，暴击率增加15%', effect: "crit", value: 0.15 },
+            { id: 19, name: '凤凰血脉', rarity: 'epic', desc: '死亡后30%概率复活，全属性提升25%', effect: "revive", value: 0.25 },
+            { id: 20, name: '时间法则', rarity: 'epic', desc: '挂机收益提升100%', effect: "spiritGain", value: 1.0 },
+            
+            // 传说天赋
+            { id: 24, name: '混沌道体', rarity: 'legendary', desc: '全属性提升50%，修炼无瓶颈', effect: "all", value: 0.5 },
+            { id: 25, name: '天道眷顾', rarity: 'legendary', desc: '奇遇概率提升150%，获得稀有物品概率翻倍', effect: "luck", value: 1.5 },
+            { id: 26, name: '不朽金身', rarity: 'legendary', desc: '免疫一切控制，受到伤害降低50%', effect: "defense", value: 0.5 },
+            { id: 27, name: '万法归一', rarity: 'legendary', desc: '所有伤害提升100%', effect: "attack", value: 1.0 }
+        ];
+        
+        // 稀有度权重
+        const RARITY_WEIGHTS = {
+            'common': 40,
+            'rare': 30,
+            'epic': 20,
+            'legendary': 10
+        };
+        
+        // ============================
+        // 核心游戏功能
+        // ============================
+        
+        // 初始化游戏
+        function initGame() {
+            showLoading(true);
+            
+            // 加载保存的游戏数据
+            loadGameData();
+            
+            // 初始化天赋
+            refreshBuffs();
+            
+            // 初始化怪物选项
+            initMonsterOptions();
+            
+            // 初始化装备系统
+            initEquipment();
+            
+            // 初始化自动回收设置
+            initAutoRecycle();
+            
+            // 开始游戏计时器
+            startGameTimer();
+            
+            // 开始自动保存
+            if (GameState.settings.autosaveEnabled) {
+                startAutoSave();
+            }
+            
+            // 更新UI
+            updateUI();
+            
+            // 隐藏加载界面
+            setTimeout(() => {
+                showLoading(false);
+                showNotification('欢迎归来', '修仙之路继续，祝道友早日得道成仙！');
+            }, 1000);
+        }
+        
+        // 显示/隐藏加载界面
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'flex' : 'none';
+        }
+        
+        // 显示通知
+        function showNotification(title, content) {
+            const notification = document.getElementById('notification');
+            const notificationTitle = document.getElementById('notification-title');
+            const notificationContent = document.getElementById('notification-content');
+            
+            notificationTitle.textContent = title;
+            notificationContent.textContent = content;
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // 计算属性（包含装备和天赋加成）
+        function calculateAttributes() {
+            // 重置为基础属性
+            GameState.character.maxHp = GameState.character.baseHp;
+            GameState.character.attack = GameState.character.baseAttack;
+            GameState.character.defense = GameState.character.baseDefense;
+            GameState.character.critRate = GameState.character.baseCritRate;
+            GameState.character.critDmg = GameState.character.baseCritDmg;
+            GameState.character.dodge = GameState.character.baseDodge;
+            GameState.character.lifeSteal = GameState.character.baseLifeSteal;
+            GameState.character.combo = GameState.character.baseCombo;
+            GameState.character.constitution = GameState.character.baseConstitution;
+            
+            // 应用体质加成
+            const constitutionMultiplier = 1 + (GameState.character.constitution * 0.01);
+            
+            GameState.character.maxHp *= constitutionMultiplier;
+            GameState.character.attack *= constitutionMultiplier;
+            GameState.character.defense *= constitutionMultiplier;
+            GameState.character.critRate *= constitutionMultiplier;
+            GameState.character.critDmg *= constitutionMultiplier;
+            GameState.character.dodge *= constitutionMultiplier;
+            GameState.character.lifeSteal *= constitutionMultiplier;
+            GameState.character.combo *= constitutionMultiplier;
+            
+            // 应用天赋加成
+            GameState.selectedBuffs.forEach(buff => {
+                applyBuffEffect(buff);
+            });
+            
+            // 应用装备加成
+            applyEquipmentEffects();
+            
+            // 确保属性不超过上限
+            GameState.character.dodge = Math.min(GameState.character.dodge, 80);
+            GameState.character.critRate = Math.min(GameState.character.critRate, 80);
+            GameState.character.lifeSteal = Math.min(GameState.character.lifeSteal, 80);
+            GameState.character.combo = Math.min(GameState.character.combo, 80);
+            
+            // 更新当前生命值
+            GameState.character.hp = Math.min(GameState.character.hp, GameState.character.maxHp);
+        }
+        
+        // 应用天赋效果
+        function applyBuffEffect(buff) {
+            switch(buff.effect) {
+                case "hp":
+                    GameState.character.maxHp *= (1 + buff.value);
+                    break;
+                case "attack":
+                    GameState.character.attack *= (1 + buff.value);
+                    break;
+                case "defense":
+                    GameState.character.defense *= (1 + buff.value);
+                    break;
+                case "dodge":
+                    GameState.character.dodge += buff.value * 100;
+                    break;
+                case "crit":
+                    GameState.character.critRate += buff.value * 100;
+                    break;
+                case "lifeSteal":
+                    GameState.character.lifeSteal += buff.value * 100;
+                    break;
+                case "combo":
+                    GameState.character.combo += buff.value * 100;
+                    break;
+                case "all":
+                    GameState.character.maxHp *= (1 + buff.value);
+                    GameState.character.attack *= (1 + buff.value);
+                    GameState.character.defense *= (1 + buff.value);
+                    GameState.character.critRate += buff.value * 100;
+                    GameState.character.critDmg += buff.value * 100;
+                    GameState.character.dodge += buff.value * 100;
+                    GameState.character.lifeSteal += buff.value * 100;
+                    GameState.character.combo += buff.value * 100;
+                    break;
+                case "spiritGain":
+                case "cultivationSpeed":
+                case "revive":
+                case "luck":
+                    // 这些效果在相关计算时处理
+                    break;
+            }
+        }
+        
+        // ============================
+        // 装备系统 - 优化版
+        // ============================
+        
+        // 初始化装备系统
+        function initEquipment() {
+            // 更新装备栏显示
+            updateEquipmentDisplay();
+            
+            // 更新背包显示
+            updateInventoryDisplay();
+            
+            // 添加初始装备到背包
+            const initialWeapon = generateEquipment('weapon', 1, 'common');
+            const initialArmor = generateEquipment('armor', 1, 'common');
+            
+            if (initialWeapon) addToInventory(initialWeapon);
+            if (initialArmor) addToInventory(initialArmor);
+            
+            // 更新UI
+            updateInventoryDisplay();
+        }
+        
+        // 生成随机装备
+        function generateEquipment(type, monsterLevel, forcedRarity = null) {
+            // 确定装备等级：怪物等级越高，高等级装备概率越高
+            // 但保持随机性，让低等级也有机会得到高等级装备
+            const level = calculateEquipmentLevel(monsterLevel);
+            
+            // 确定稀有度：怪物等级越高，高稀有度概率越高
+            // 但低等级怪物也有极小概率掉落传奇装备
+            const rarity = forcedRarity || calculateEquipmentRarity(monsterLevel);
+            
+            // 获取稀有度数据
+            const rarityData = EQUIPMENT_RARITIES.find(r => r.id === rarity);
+            if (!rarityData) return null;
+            
+            // 获取装备类型数据
+            const typeData = EQUIPMENT_TYPES.find(t => t.id === type);
+            if (!typeData) return null;
+            
+            // 生成装备名称
+            const prefix = EQUIPMENT_PREFIXES[rarity][Math.floor(Math.random() * EQUIPMENT_PREFIXES[rarity].length)];
+            const suffix = EQUIPMENT_SUFFIXES[type][Math.floor(Math.random() * EQUIPMENT_SUFFIXES[type].length)];
+            const name = `${prefix}${suffix}`;
+            
+            // 生成基础属性（基于等级和稀有度）
+            const baseStats = generateBaseStats(type, level, rarityData.multiplier);
+            
+            // 随机添加附加属性（稀有度越高，附加属性越多）
+            const additionalStats = generateAdditionalStats(type, rarity);
+            
+            // 合并属性
+            const stats = { ...baseStats, ...additionalStats };
+            
+            // 计算价格
+            const price = calculateEquipmentPrice(stats, level, rarityData.multiplier);
+            
+            // 生成描述
+            const desc = generateEquipmentDescription(name, type, level, rarity, stats);
+            
+            // 创建装备对象
+            const equipment = {
+                id: Date.now() + Math.floor(Math.random() * 1000),
+                name: name,
+                type: type,
+                rarity: rarity,
+                level: level,
+                ...stats,
+                price: price,
+                desc: desc,
+                icon: typeData.icon
+            };
+            
+            return equipment;
+        }
+        
+        // 计算装备等级
+        function calculateEquipmentLevel(monsterLevel) {
+            // 基础等级范围：怪物等级-2到怪物等级+5
+            const minLevel = Math.max(1, monsterLevel - 2);
+            const maxLevel = monsterLevel + 5;
+            
+            // 使用加权随机：怪物等级越高，高等级装备概率越高
+            // 但低等级怪物也有机会掉落高等级装备
+            const randomFactor = Math.random();
+            
+            // 指数分布，让高等级装备更稀有
+            let level;
+            if (randomFactor < 0.6) {
+                // 60%概率：等级在minLevel到monsterLevel之间
+                level = minLevel + Math.floor(Math.random() * (monsterLevel - minLevel + 1));
+            } else if (randomFactor < 0.9) {
+                // 30%概率：等级在monsterLevel到monsterLevel+2之间
+                level = monsterLevel + Math.floor(Math.random() * 3);
+            } else {
+                // 10%概率：等级在monsterLevel+2到maxLevel之间
+                level = monsterLevel + 2 + Math.floor(Math.random() * (maxLevel - monsterLevel - 1));
+            }
+            
+            // 确保等级在合理范围内
+            return Math.max(1, Math.min(level, maxLevel));
+        }
+        
+        // 计算装备稀有度
+        function calculateEquipmentRarity(monsterLevel) {
+            // 基础概率
+            let probabilities = {
+                common: 0.5,
+                rare: 0.3,
+                epic: 0.15,
+                legendary: 0.05
+            };
+            
+            // 根据怪物等级调整概率
+            // 怪物等级越高，高稀有度概率越高
+            const levelFactor = Math.min(monsterLevel / 10, 1);
+            
+            probabilities.common = Math.max(0.1, 0.5 - levelFactor * 0.4);
+            probabilities.rare = Math.min(0.4, 0.3 + levelFactor * 0.2);
+            probabilities.epic = Math.min(0.3, 0.15 + levelFactor * 0.2);
+            probabilities.legendary = Math.min(0.2, 0.05 + levelFactor * 0.15);
+            
+            // 低等级怪物也有极小概率掉落传奇装备
+            if (monsterLevel <= 3) {
+                probabilities.legendary = 0.01; // 1%概率
+            }
+            
+            // 归一化
+            const total = probabilities.common + probabilities.rare + probabilities.epic + probabilities.legendary;
+            probabilities.common /= total;
+            probabilities.rare /= total;
+            probabilities.epic /= total;
+            probabilities.legendary /= total;
+            
+            // 随机选择稀有度
+            const rand = Math.random();
+            let cumulative = 0;
+            
+            for (const rarity in probabilities) {
+                cumulative += probabilities[rarity];
+                if (rand <= cumulative) {
+                    return rarity;
+                }
+            }
+            
+            return 'common';
+        }
+        
+        // 生成基础属性
+        function generateBaseStats(type, level, rarityMultiplier) {
+            const stats = {};
+            const typeData = EQUIPMENT_STATS[type];
+            
+            if (!typeData) return stats;
+            
+            // 主属性
+            const primaryValue = Math.floor(level * 2 * rarityMultiplier);
+            stats[typeData.primary] = primaryValue;
+            
+            // 根据装备类型添加额外基础属性
+            switch(type) {
+                case 'weapon':
+                    stats.attack = primaryValue;
+                    break;
+                case 'armor':
+                    stats.defense = Math.floor(level * 1.5 * rarityMultiplier);
+                    stats.hp = Math.floor(level * 10 * rarityMultiplier);
+                    break;
+                case 'hand':
+                    stats.critRate = Math.floor(level * 0.5 * rarityMultiplier);
+                    break;
+                case 'ring':
+                    stats.critDmg = Math.floor(level * 2 * rarityMultiplier);
+                    break;
+                case 'necklace':
+                    stats.hp = Math.floor(level * 15 * rarityMultiplier);
+                    break;
+                case 'shoe':
+                    stats.dodge = Math.floor(level * 0.5 * rarityMultiplier);
+                    stats.hp = Math.floor(level * 5 * rarityMultiplier);
+                    break;
+            }
+            
+            return stats;
+        }
+        
+        // 生成附加属性
+        function generateAdditionalStats(type, rarity) {
+            const stats = {};
+            const typeData = EQUIPMENT_STATS[type];
+            
+            if (!typeData) return stats;
+            
+            // 根据稀有度决定附加属性数量
+            let additionalCount = 0;
+            switch(rarity) {
+                case 'common':
+                    additionalCount = 0; // 普通装备无附加属性
+                    break;
+                case 'rare':
+                    additionalCount = 1;
+                    break;
+                case 'epic':
+                    additionalCount = 2;
+                    break;
+                case 'legendary':
+                    additionalCount = 3;
+                    break;
+            }
+            
+            // 可选的属性池（排除主属性）
+            const availableStats = typeData.possibleStats.filter(stat => stat !== typeData.primary);
+            
+            // 随机选择附加属性
+            for (let i = 0; i < additionalCount && availableStats.length > 0; i++) {
+                const randomIndex = Math.floor(Math.random() * availableStats.length);
+                const selectedStat = availableStats[randomIndex];
+                
+                // 根据属性类型生成值
+                let value = 0;
+                switch(selectedStat) {
+                    case 'attack':
+                    case 'defense':
+                        value = Math.floor(5 + Math.random() * 10);
+                        break;
+                    case 'hp':
+                        value = Math.floor(20 + Math.random() * 50);
+                        break;
+                    case 'critRate':
+                    case 'dodge':
+                    case 'lifeSteal':
+                    case 'combo':
+                        value = Math.floor(1 + Math.random() * 5);
+                        break;
+                    case 'critDmg':
+                        value = Math.floor(5 + Math.random() * 15);
+                        break;
+                }
+                
+                // 稀有度加成
+                const rarityMultiplier = EQUIPMENT_RARITIES.find(r => r.id === rarity).multiplier;
+                value = Math.floor(value * rarityMultiplier);
+                
+                // 添加到属性
+                stats[selectedStat] = (stats[selectedStat] || 0) + value;
+                
+                // 从可用属性中移除，避免重复
+                availableStats.splice(randomIndex, 1);
+            }
+            
+            return stats;
+        }
+        
+        // 计算装备价格
+        function calculateEquipmentPrice(stats, level, rarityMultiplier) {
+            let price = 0;
+            
+            // 基础价格
+            price += level * 10 * rarityMultiplier;
+            
+            // 属性加成
+            for (const stat in stats) {
+                let statValue = stats[stat];
+                let statWeight = 1;
+                
+                switch(stat) {
+                    case 'attack':
+                    case 'defense':
+                        statWeight = 2;
+                        break;
+                    case 'hp':
+                        statWeight = 0.1;
+                        break;
+                    case 'critRate':
+                    case 'dodge':
+                    case 'lifeSteal':
+                    case 'combo':
+                        statWeight = 5;
+                        break;
+                    case 'critDmg':
+                        statWeight = 3;
+                        break;
+                }
+                
+                price += statValue * statWeight * rarityMultiplier;
+            }
+            
+            return Math.floor(price);
+        }
+        
+        // 生成装备描述
+        function generateEquipmentDescription(name, type, level, rarity, stats) {
+            const rarityName = EQUIPMENT_RARITIES.find(r => r.id === rarity).name;
+            const typeName = EQUIPMENT_TYPES.find(t => t.id === type).name;
+            
+            let desc = `一件${rarityName}的${typeName}，等级${level}。`;
+            
+            // 添加属性描述
+            const statEntries = Object.entries(stats);
+            if (statEntries.length > 0) {
+                desc += ' 拥有';
+                statEntries.forEach(([stat, value], index) => {
+                    const statName = getStatName(stat);
+                    desc += ` ${statName}+${value}`;
+                    if (index < statEntries.length - 1) desc += '，';
+                });
+                desc += '。';
+            }
+            
+            return desc;
+        }
+        
+        // 获取属性名称
+        function getStatName(stat) {
+            const statNames = {
+                attack: '攻击',
+                defense: '防御',
+                hp: '生命',
+                critRate: '暴击率',
+                critDmg: '暴击伤害',
+                dodge: '闪避',
+                lifeSteal: '吸血',
+                combo: '连击'
+            };
+            
+            return statNames[stat] || stat;
+        }
+        
+        // 应用装备效果
+        function applyEquipmentEffects() {
+            let totalAttackBonus = 0;
+            let totalDefenseBonus = 0;
+            let totalHpBonus = 0;
+            
+            // 应用所有装备的属性
+            for (const slot in GameState.equipment) {
+                const equipment = GameState.equipment[slot];
+                if (equipment) {
+                    // 攻击属性
+                    if (equipment.attack) {
+                        GameState.character.attack += equipment.attack;
+                        totalAttackBonus += equipment.attack;
+                    }
+                    
+                    // 防御属性
+                    if (equipment.defense) {
+                        GameState.character.defense += equipment.defense;
+                        totalDefenseBonus += equipment.defense;
+                    }
+                    
+                    // 生命属性
+                    if (equipment.hp) {
+                        GameState.character.maxHp += equipment.hp;
+                        totalHpBonus += equipment.hp;
+                    }
+                    
+                    // 暴击率
+                    if (equipment.critRate) {
+                        GameState.character.critRate += equipment.critRate;
+                    }
+                    
+                    // 暴击伤害
+                    if (equipment.critDmg) {
+                        GameState.character.critDmg += equipment.critDmg;
+                    }
+                    
+                    // 闪避
+                    if (equipment.dodge) {
+                        GameState.character.dodge += equipment.dodge;
+                    }
+                    
+                    // 吸血
+                    if (equipment.lifeSteal) {
+                        GameState.character.lifeSteal += equipment.lifeSteal;
+                    }
+                    
+                    // 连击
+                    if (equipment.combo) {
+                        GameState.character.combo += equipment.combo;
+                    }
+                }
+            }
+            
+            // 更新装备加成显示
+            document.getElementById('total-attack-bonus').textContent = totalAttackBonus;
+            document.getElementById('total-defense-bonus').textContent = totalDefenseBonus;
+            document.getElementById('total-hp-bonus').textContent = totalHpBonus;
+            
+            document.getElementById('equipment-attack-bonus').textContent = totalAttackBonus;
+            document.getElementById('equipment-defense-bonus').textContent = totalDefenseBonus;
+            document.getElementById('equipment-hp-bonus').textContent = totalHpBonus;
+            
+            // 检查套装效果
+            checkSetBonus();
+        }
+        
+        // 检查套装效果
+        function checkSetBonus() {
+            // 统计史诗和传说装备数量
+            let epicCount = 0;
+            let legendaryCount = 0;
+            
+            for (const slot in GameState.equipment) {
+                const equipment = GameState.equipment[slot];
+                if (equipment) {
+                    if (equipment.rarity === 'epic') epicCount++;
+                    if (equipment.rarity === 'legendary') legendaryCount++;
+                }
+            }
+            
+            let setBonus = '无';
+            
+            // 传说套装效果
+            if (legendaryCount >= 3) {
+                // 3件传说装备：全属性+20%
+                GameState.character.attack *= 1.2;
+                GameState.character.defense *= 1.2;
+                GameState.character.maxHp *= 1.2;
+                GameState.character.critRate *= 1.2;
+                GameState.character.critDmg *= 1.2;
+                GameState.character.dodge *= 1.2;
+                setBonus = '传说套装(+20%全属性)';
+            } else if (epicCount >= 3) {
+                // 3件史诗装备：全属性+10%
+                GameState.character.attack *= 1.1;
+                GameState.character.defense *= 1.1;
+                GameState.character.maxHp *= 1.1;
+                setBonus = '史诗套装(+10%全属性)';
+            } else if (epicCount >= 2) {
+                setBonus = '2件史诗装备';
+            } else if (legendaryCount >= 1) {
+                setBonus = '1件传说装备';
+            }
+            
+            document.getElementById('set-bonus').textContent = setBonus;
+        }
+        
+        // 更新装备栏显示
+        function updateEquipmentDisplay() {
+            const equipmentGrid = document.getElementById('equipment-grid');
+            
+            // 更新所有装备槽
+            for (const slotType in GameState.equipment) {
+                const slotElement = equipmentGrid.querySelector(`[data-slot="${slotType}"]`);
+                if (!slotElement) continue;
+                
+                const equipment = GameState.equipment[slotType];
+                const typeData = EQUIPMENT_TYPES.find(t => t.id === slotType);
+                
+                if (equipment && typeData) {
+                    slotElement.classList.add('filled');
+                    
+                    // 获取主属性值
+                    let mainStat = '';
+                    let mainValue = 0;
+                    
+                    if (equipment.attack) {
+                        mainStat = '攻';
+                        mainValue = equipment.attack;
+                    } else if (equipment.defense) {
+                        mainStat = '防';
+                        mainValue = equipment.defense;
+                    } else if (equipment.hp) {
+                        mainStat = '生';
+                        mainValue = equipment.hp;
+                    } else if (equipment.critRate) {
+                        mainStat = '暴';
+                        mainValue = equipment.critRate;
+                    }
+                    
+                    slotElement.innerHTML = `
+                        <div class="equipment-icon">${equipment.icon || typeData.icon}</div>
+                        <div class="equipment-name">${equipment.name}</div>
+                        <div class="equipment-stats">${mainStat}+${mainValue}</div>
+                        <div class="long-press-hint">长按脱下</div>
+                    `;
+                } else {
+                    slotElement.classList.remove('filled');
+                    slotElement.innerHTML = `
+                        <div class="equipment-icon">${typeData ? typeData.icon : '📦'}</div>
+                        <div class="equipment-name">${typeData ? typeData.name : '装备'}</div>
+                        <div class="equipment-stats">未装备</div>
+                        <div class="long-press-hint">长按脱下</div>
+                    `;
+                }
+            }
+        }
+        
+        // 更新背包显示
+        function updateInventoryDisplay() {
+            const inventoryGrid = document.getElementById('inventory-grid');
+            const inventoryCount = document.getElementById('inventory-count');
+            
+            inventoryGrid.innerHTML = '';
+            inventoryCount.textContent = GameState.inventory.length;
+            
+            // 更新出售按钮状态
+            const sellBtn = document.getElementById('sell-equipment-btn');
+            
+            if (GameState.selectedInventoryItem !== null) {
+                sellBtn.disabled = false;
+            } else {
+                sellBtn.disabled = true;
+            }
+            
+            // 显示背包物品
+            GameState.inventory.forEach((item, index) => {
+                const itemElement = document.createElement('div');
+                itemElement.className = `inventory-item ${GameState.selectedInventoryItem === index ? 'selected' : ''}`;
+                itemElement.dataset.index = index;
+                
+                // 根据稀有度设置颜色
+                const rarityData = EQUIPMENT_RARITIES.find(r => r.id === item.rarity);
+                const rarityColor = rarityData ? rarityData.color : '#999';
+                
+                // 获取主属性
+                let mainStat = '';
+                let mainValue = 0;
+                
+                if (item.attack) {
+                    mainStat = '攻';
+                    mainValue = item.attack;
+                } else if (item.defense) {
+                    mainStat = '防';
+                    mainValue = item.defense;
+                } else if (item.hp) {
+                    mainStat = '生';
+                    mainValue = item.hp;
+                } else if (item.critRate) {
+                    mainStat = '暴';
+                    mainValue = item.critRate;
+                }
+                
+                itemElement.innerHTML = `
+                    <div class="item-rarity" style="background:${rarityColor}">${rarityData ? rarityData.name : '普通'}</div>
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-stats">${mainStat}+${mainValue}</div>
+                    <div class="item-type">${EQUIPMENT_TYPES.find(t => t.id === item.type)?.name || '装备'}</div>
+                    <div class="item-level">Lv.${item.level}</div>
+                `;
+                inventoryGrid.appendChild(itemElement);
+            });
+            
+            // 如果背包为空，显示提示
+            if (GameState.inventory.length === 0) {
+                const emptyMessage = document.createElement('div');
+                emptyMessage.style.textAlign = 'center';
+                emptyMessage.style.color = '#999';
+                emptyMessage.style.padding = '15px';
+                emptyMessage.innerHTML = '背包空空如也<br>击败怪物有几率掉落装备';
+                inventoryGrid.appendChild(emptyMessage);
+            }
+        }
+        
+        // 添加到背包
+        function addToInventory(item) {
+            if (GameState.inventory.length >= 30) {
+                showNotification('背包已满', '背包空间不足，无法拾取新装备！');
+                return false;
+            }
+            
+            // 检查是否应该自动回收
+            if (shouldAutoRecycle(item)) {
+                autoRecycleItem(item);
+                return false;
+            }
+            
+            // 创建装备副本
+            const newItem = JSON.parse(JSON.stringify(item));
+            GameState.inventory.push(newItem);
+            
+            // 更新背包显示
+            updateInventoryDisplay();
+            
+            return true;
+        }
+        
+        // 从背包移除物品
+        function removeFromInventory(index) {
+            if (index >= 0 && index < GameState.inventory.length) {
+                GameState.inventory.splice(index, 1);
+                
+                // 如果移除的是选中的物品，清空选中状态
+                if (GameState.selectedInventoryItem === index) {
+                    GameState.selectedInventoryItem = null;
+                } else if (GameState.selectedInventoryItem > index) {
+                    GameState.selectedInventoryItem--;
+                }
+                
+                updateInventoryDisplay();
+                return true;
+            }
+            return false;
+        }
+        
+        // 穿戴装备
+        function equipItem(itemIndex) {
+            const item = GameState.inventory[itemIndex];
+            if (!item) return;
+            
+            // 检查等级要求
+            if (item.level > GameState.character.level) {
+                showNotification('穿戴失败', `需要达到${item.level}级才能穿戴此装备！`);
+                return;
+            }
+            
+            // 脱下当前装备（如果有）
+            let oldItem = null;
+            oldItem = GameState.equipment[item.type];
+            GameState.equipment[item.type] = item;
+            
+            // 移除背包中的装备
+            removeFromInventory(itemIndex);
+            
+            // 如果有旧装备，放回背包
+            if (oldItem) {
+                addToInventory(oldItem);
+            }
+            
+            // 重新计算属性
+            calculateAttributes();
+            
+            showNotification('装备穿戴', `你穿上了【${item.name}】！`);
+            updateEquipmentDisplay();
+            updateInventoryDisplay();
+            updateUI();
+        }
+        
+        // 脱下装备
+        function unequipItem(slotType) {
+            let item = GameState.equipment[slotType];
+            GameState.equipment[slotType] = null;
+            
+            if (item) {
+                // 将装备放回背包
+                if (addToInventory(item)) {
+                    // 重新计算属性
+                    calculateAttributes();
+                    
+                    showNotification('装备脱下', `你脱下了【${item.name}】！`);
+                    updateEquipmentDisplay();
+                    updateInventoryDisplay();
+                    updateUI();
+                } else {
+                    // 背包已满，恢复装备
+                    GameState.equipment[slotType] = item;
+                    showNotification('脱下失败', '背包已满，无法脱下装备！');
+                }
+            }
+        }
+        
+        // 出售装备
+        function sellSelectedEquipment() {
+            if (GameState.selectedInventoryItem === null) return;
+            
+            const item = GameState.inventory[GameState.selectedInventoryItem];
+            if (!item) return;
+            
+            const sellPrice = Math.floor(item.price * 0.7); // 出售价格为原价的70%
+            
+            if (confirm(`确定出售【${item.name}】获得${sellPrice}点灵力吗？`)) {
+                GameState.spiritPower += sellPrice;
+                removeFromInventory(GameState.selectedInventoryItem);
+                
+                showNotification('装备出售', `出售【${item.name}】获得${sellPrice}点灵力！`);
+                updateUI();
+            }
+        }
+        
+        // 显示装备详情
+        function showEquipmentDetails(item) {
+            const detailsPanel = document.getElementById('equipment-details');
+            const detailsContent = document.getElementById('equipment-details-content');
+            
+            if (!item) {
+                detailsPanel.classList.remove('show');
+                return;
+            }
+            
+            // 获取稀有度数据
+            const rarityData = EQUIPMENT_RARITIES.find(r => r.id === item.rarity);
+            const rarityColor = rarityData ? rarityData.color : '#999';
+            const rarityName = rarityData ? rarityData.name : '普通';
+            
+            // 生成属性HTML
+            let statsHtml = '';
+            if (item.attack) statsHtml += `<div>攻击力: +${item.attack}</div>`;
+            if (item.defense) statsHtml += `<div>防御力: +${item.defense}</div>`;
+            if (item.hp) statsHtml += `<div>生命值: +${item.hp}</div>`;
+            if (item.critRate) statsHtml += `<div>暴击率: +${item.critRate}%</div>`;
+            if (item.critDmg) statsHtml += `<div>暴击伤害: +${item.critDmg}%</div>`;
+            if (item.dodge) statsHtml += `<div>闪避率: +${item.dodge}%</div>`;
+            if (item.lifeSteal) statsHtml += `<div>吸血率: +${item.lifeSteal}%</div>`;
+            if (item.combo) statsHtml += `<div>连击率: +${item.combo}%</div>`;
+            
+            detailsContent.innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                    <div style="font-size: 1.8rem; margin-right: 8px;">${item.icon || '📦'}</div>
+                    <div>
+                        <div style="font-size: 1.1rem; color: ${rarityColor}; font-weight: bold;">${item.name}</div>
+                        <div style="color: ${rarityColor}; font-size: 0.85rem;">${rarityName} · ${EQUIPMENT_TYPES.find(t => t.id === item.type)?.name || '装备'}</div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 8px; color: #666;">${item.desc}</div>
+                <div style="margin-bottom: 8px;">
+                    <div style="color: #4682b4; font-weight: bold; margin-bottom: 4px;">装备属性:</div>
+                    ${statsHtml || '<div>无附加属性</div>'}
+                </div>
+                <div style="display: flex; justify-content: space-between; color: #daa520;">
+                    <div>等级要求: ${item.level}</div>
+                    <div>出售价格: ${Math.floor(item.price * 0.7)}灵力</div>
+                </div>
+            `;
+            
+            detailsPanel.classList.add('show');
+        }
+        
+        // 击败怪物时掉落装备
+        function dropEquipmentOnMonsterDefeat(monsterLevel) {
+            // 掉落概率：基础10% + 怪物等级*20%
+            const dropChance = 0.1 + (monsterLevel * 0.2);
+            
+            if (Math.random() < dropChance) {
+                // 随机选择装备类型
+                const randomTypeIndex = Math.floor(Math.random() * EQUIPMENT_TYPES.length);
+                const equipmentType = EQUIPMENT_TYPES[randomTypeIndex].id;
+                
+                // 生成装备
+                const equipment = generateEquipment(equipmentType, monsterLevel);
+                
+                if (equipment) {
+                    // 添加到背包
+                    if (addToInventory(equipment)) {
+                        return equipment;
+                    }
+                }
+            }
+            
+            return null;
+        }
+        
+        // ============================
+        // 自动回收系统
+        // ============================
+        
+        // 初始化自动回收设置
+        function initAutoRecycle() {
+            // 从本地存储加载设置
+            const savedSettings = localStorage.getItem('cultivation_auto_recycle');
+            if (savedSettings) {
+                try {
+                    GameState.autoRecycle = JSON.parse(savedSettings);
+                } catch (e) {
+                    console.error('加载自动回收设置失败:', e);
+                }
+            }
+            
+            // 更新UI
+            updateAutoRecycleUI();
+        }
+        
+        // 更新自动回收UI
+        function updateAutoRecycleUI() {
+            document.getElementById('recycle-level').value = GameState.autoRecycle.levelThreshold;
+            document.getElementById('recycle-rarity').value = GameState.autoRecycle.rarityThreshold;
+            document.getElementById('total-recycled-spirit').textContent = GameState.autoRecycle.totalRecycledSpirit;
+            document.getElementById('total-recycled-items').textContent = GameState.autoRecycle.totalRecycledItems;
+        }
+        
+        // 检查是否应该自动回收
+        function shouldAutoRecycle(item) {
+            // 检查等级阈值
+            if (GameState.autoRecycle.levelThreshold > 0 && item.level < GameState.autoRecycle.levelThreshold) {
+                return true;
+            }
+            
+            // 检查稀有度阈值
+            if (GameState.autoRecycle.rarityThreshold !== 'none') {
+                const rarityOrder = ['common', 'rare', 'epic', 'legendary'];
+                const itemRarityIndex = rarityOrder.indexOf(item.rarity);
+                const thresholdRarityIndex = rarityOrder.indexOf(GameState.autoRecycle.rarityThreshold);
+                
+                if (itemRarityIndex < thresholdRarityIndex) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        // 自动回收装备
+        function autoRecycleItem(item) {
+            const sellPrice = Math.floor(item.price * 0.7);
+            GameState.spiritPower += sellPrice;
+            GameState.autoRecycle.totalRecycledSpirit += sellPrice;
+            GameState.autoRecycle.totalRecycledItems++;
+            
+            // 显示通知
+            showNotification('自动回收', `自动回收【${item.name}】获得${sellPrice}点灵力！`);
+            
+            // 更新UI
+            updateAutoRecycleUI();
+            updateUI();
+            
+            return true;
+        }
+        
+        // 手动回收背包
+        function manualRecycleBackpack() {
+            let recycledCount = 0;
+            let totalSpirit = 0;
+            
+            // 从后往前遍历，避免索引问题
+            for (let i = GameState.inventory.length - 1; i >= 0; i--) {
+                const item = GameState.inventory[i];
+                
+                // 检查是否应该回收
+                if (shouldAutoRecycle(item)) {
+                    const sellPrice = Math.floor(item.price * 0.7);
+                    totalSpirit += sellPrice;
+                    recycledCount++;
+                    
+                    // 从背包移除
+                    removeFromInventory(i);
+                }
+            }
+            
+            if (recycledCount > 0) {
+                GameState.spiritPower += totalSpirit;
+                GameState.autoRecycle.totalRecycledSpirit += totalSpirit;
+                GameState.autoRecycle.totalRecycledItems += recycledCount;
+                
+                showNotification('背包回收', `回收了${recycledCount}件装备，获得${totalSpirit}点灵力！`);
+                
+                // 更新UI
+                updateAutoRecycleUI();
+                updateUI();
+            } else {
+                showNotification('背包回收', '没有符合条件的装备可以回收！');
+            }
+        }
+        
+        // 保存自动回收设置
+        function saveAutoRecycleSettings() {
+            // 获取当前设置
+            GameState.autoRecycle.levelThreshold = parseInt(document.getElementById('recycle-level').value);
+            GameState.autoRecycle.rarityThreshold = document.getElementById('recycle-rarity').value;
+            
+            // 保存到本地存储
+            try {
+                localStorage.setItem('cultivation_auto_recycle', JSON.stringify(GameState.autoRecycle));
+                showNotification('设置保存', '自动回收设置已保存！');
+            } catch (e) {
+                showNotification('保存失败', '保存设置失败，请检查浏览器设置');
+            }
+        }
+        
+        // ============================
+        // 天赋系统
+        // ============================
+        
+        // 刷新天赋
+        function refreshBuffs() {
+            if (GameState.refreshCount <= 0) {
+                showNotification('刷新失败', '刷新次数已用完！');
+                return;
+            }
+            
+            GameState.refreshCount--;
+            
+            // 保留锁定的天赋
+            const lockedBuffs = GameState.buffs.filter(buff => buff.locked);
+            
+            // 计算需要刷新的数量
+            const refreshCount = 9 - lockedBuffs.length;
+            
+            // 获取当前已存在天赋的ID（包括锁定的和选中的）
+            const existingBuffIds = new Set();
+            lockedBuffs.forEach(buff => existingBuffIds.add(buff.id));
+            GameState.selectedBuffs.forEach(buff => existingBuffIds.add(buff.id));
+            
+            // 随机选择新BUFF（按权重），确保不重复
+            const newBuffs = [...lockedBuffs];
+            for (let i = 0; i < refreshCount; i++) {
+                const rand = Math.random() * 100;
+                let rarity;
+                
+                if (rand < RARITY_WEIGHTS.legendary) rarity = 'legendary';
+                else if (rand < RARITY_WEIGHTS.legendary + RARITY_WEIGHTS.epic) rarity = 'epic';
+                else if (rand < RARITY_WEIGHTS.legendary + RARITY_WEIGHTS.epic + RARITY_WEIGHTS.rare) rarity = 'rare';
+                else rarity = 'common';
+                
+                // 筛选该稀有度且不在现有天赋中的BUFF
+                const availableBuffs = BUFF_POOL.filter(buff => 
+                    buff.rarity === rarity && !existingBuffIds.has(buff.id)
+                );
+                
+                // 如果该稀有度没有可用天赋，选择任意稀有度但不在现有天赋中的BUFF
+                if (availableBuffs.length === 0) {
+                    const fallbackBuffs = BUFF_POOL.filter(buff => !existingBuffIds.has(buff.id));
+                    if (fallbackBuffs.length > 0) {
+                        const randomBuff = {...fallbackBuffs[Math.floor(Math.random() * fallbackBuffs.length)]};
+                        randomBuff.selected = GameState.selectedBuffs.some(b => b.id === randomBuff.id);
+                        randomBuff.locked = false;
+                        newBuffs.push(randomBuff);
+                        existingBuffIds.add(randomBuff.id);
+                    }
+                } else {
+                    const randomBuff = {...availableBuffs[Math.floor(Math.random() * availableBuffs.length)]};
+                    randomBuff.selected = GameState.selectedBuffs.some(b => b.id === randomBuff.id);
+                    randomBuff.locked = false;
+                    newBuffs.push(randomBuff);
+                    existingBuffIds.add(randomBuff.id);
+                }
+            }
+            
+            GameState.buffs = newBuffs;
+            updateBuffsDisplay();
+            updateUI();
+            
+            // 更新开始按钮状态
+            document.getElementById('start-btn').disabled = GameState.selectedBuffs.length < 2;
+        }
+        
+        // 选择/取消选择天赋
+        function toggleBuffSelection(buffIndex) {
+            const buff = GameState.buffs[buffIndex];
+            if (!buff) return;
+            
+            // 切换选择状态
+            buff.selected = !buff.selected;
+            
+            if (buff.selected) {
+                // 添加到已选
+                if (GameState.selectedBuffs.length < 2) {
+                    // 确保同一个天赋不会重复选择
+                    if (!GameState.selectedBuffs.some(b => b.id === buff.id)) {
+                        GameState.selectedBuffs.push(buff);
+                    }
+                } else {
+                    // 如果已选两个，取消选择
+                    buff.selected = false;
+                    showNotification('选择限制', '最多只能选择两个天赋');
+                    return;
+                }
+            } else {
+                // 从已选中移除
+                const buffIndexInSelected = GameState.selectedBuffs.findIndex(b => b.id === buff.id);
+                if (buffIndexInSelected !== -1) {
+                    GameState.selectedBuffs.splice(buffIndexInSelected, 1);
+                }
+            }
+            
+            // 更新显示
+            updateBuffsDisplay();
+            
+            // 更新开始按钮状态
+            document.getElementById('start-btn').disabled = GameState.selectedBuffs.length < 2;
+        }
+        
+        // 锁定/解锁天赋
+        function toggleBuffLock(buffIndex) {
+            const buff = GameState.buffs[buffIndex];
+            if (!buff) return;
+            
+            buff.locked = !buff.locked;
+            
+            // 更新显示
+            updateBuffsDisplay();
+        }
+        
+        // 获取稀有度名称
+        function getRarityName(rarity) {
+            switch(rarity) {
+                case 'common': return '普通';
+                case 'rare': return '稀有';
+                case 'epic': return '史诗';
+                case 'legendary': return '传说';
+                case 'mythic': return '神话';
+                default: return '未知';
+            }
+        }
+        
+        // 更新天赋显示
+        function updateBuffsDisplay() {
+            const buffContainer = document.getElementById('buff-container');
+            buffContainer.innerHTML = '';
+            
+            GameState.buffs.forEach((buff, index) => {
+                const buffElement = document.createElement('div');
+                buffElement.className = `buff-card ${buff.rarity} ${buff.selected ? 'selected' : ''}`;
+                buffElement.dataset.index = index;
+                buffElement.innerHTML = `
+                    <div class="lock-icon ${buff.locked ? 'locked' : ''}"><i class="fas ${buff.locked ? 'fa-lock' : 'fa-lock-open'}"></i></div>
+                    <div class="buff-rarity">${getRarityName(buff.rarity)}</div>
+                    <div class="buff-name">${buff.name}</div>
+                    <div class="buff-desc">${buff.desc}</div>
+                    <div class="buff-select">已选择</div>
+                `;
+                buffContainer.appendChild(buffElement);
+            });
+            
+            // 更新已选天赋显示
+            updateSelectedBuffsDisplay();
+        }
+        
+        // 更新已选天赋显示
+        function updateSelectedBuffsDisplay() {
+            const selectedBuffsGrid = document.getElementById('selected-buffs-grid');
+            selectedBuffsGrid.innerHTML = '';
+            
+            GameState.selectedBuffs.forEach((buff, index) => {
+                const buffElement = document.createElement('div');
+                buffElement.className = `buff-card ${buff.rarity} selected`;
+                buffElement.innerHTML = `
+                    <div class="buff-rarity">${getRarityName(buff.rarity)}</div>
+                    <div class="buff-name">${buff.name}</div>
+                    <div class="buff-desc">${buff.desc}</div>
+                `;
+                selectedBuffsGrid.appendChild(buffElement);
+            });
+            
+            // 更新已选天赋数量
+            document.getElementById('selected-buffs-count').textContent = GameState.selectedBuffs.length;
+        }
+        
+        // ============================
+        // 战斗系统
+        // ============================
+        
+        // 处理战斗动作
+        function handleBattleAction(action) {
+            if (!GameState.character.isAlive) return;
+            
+            switch(action) {
+                case 'attack':
+                    performAttack();
+                    break;
+            }
+        }
+        
+        // 执行攻击
+        function performAttack() {
+            let totalDamage = 0;
+            let comboCount = 1;
+            
+            // 检查连击
+            if (Math.random() < (GameState.character.combo / 100)) {
+                comboCount = 2 + Math.floor(Math.random() * 3);
+                updateBattleInfo(`触发连击！将进行${comboCount}次攻击！`);
+            }
+            
+            for (let i = 0; i < comboCount; i++) {
+                // 计算暴击
+                let isCrit = Math.random() < (GameState.character.critRate / 100);
+                let critMultiplier = isCrit ? GameState.character.critDmg / 100 : 1;
+                
+                const playerDamage = Math.floor(
+                    GameState.character.attack * (0.8 + Math.random() * 0.4) * critMultiplier
+                );
+                
+                GameState.monster.hp -= playerDamage;
+                totalDamage += playerDamage;
+                
+                if (GameState.monster.hp < 0) GameState.monster.hp = 0;
+                
+                let logMessage = '';
+                if (isCrit) {
+                    logMessage = `第${i+1}击暴击！造成 ${playerDamage} 点伤害！`;
+                    // 创建暴击动画元素
+                    if (GameState.settings.animationEnabled) {
+                        const critElement = document.createElement('div');
+                        critElement.className = 'crit-text';
+                        critElement.textContent = `暴击！${playerDamage}`;
+                        critElement.style.position = 'absolute';
+                        critElement.style.top = '50%';
+                        critElement.style.left = '50%';
+                        critElement.style.transform = 'translate(-50%, -50%)';
+                        critElement.style.fontSize = '20px';
+                        critElement.style.zIndex = '100';
+                        critElement.style.animation = 'critAnimation 0.5s ease-in-out';
+                        
+                        document.querySelector('.monster-battle').appendChild(critElement);
+                        
+                        setTimeout(() => {
+                            critElement.remove();
+                        }, 1000);
+                    }
+                } else {
+                    logMessage = `第${i+1}击造成 ${playerDamage} 点伤害！`;
+                }
+                
+                updateBattleInfo(logMessage);
+                
+                // 吸血效果
+                if (GameState.character.lifeSteal > 0) {
+                    const healAmount = Math.floor(playerDamage * (GameState.character.lifeSteal / 100));
+                    GameState.character.hp = Math.min(GameState.character.hp + healAmount, GameState.character.maxHp);
+                    updateBattleInfo(`吸血效果恢复 ${healAmount} 点生命值！`);
+                }
+                
+                // 如果怪物死亡，跳出循环
+                if (GameState.monster.hp <= 0) {
+                    break;
+                }
+            }
+            
+            setTimeout(() => {
+                if (GameState.monster.hp <= 0) {
+                    defeatMonster();
+                } else {
+                    const isDodge = Math.random() < (GameState.character.dodge / 100);
+                    
+                    if (isDodge) {
+                        updateBattleInfo(`${GameState.monster.name}发动攻击，但你成功闪避了！`);
+                    } else {
+                        // 伤害计算公式
+                        let monsterDamage = Math.floor(
+                            GameState.monster.attack - 1.33 * GameState.character.defense
+                        );
+                        
+                        // 如果伤害小于1，则强制为1
+                        if (monsterDamage < 1) monsterDamage = 1;
+                        
+                        GameState.character.hp -= monsterDamage;
+                        
+                        if (GameState.character.hp <= 0) {
+                            GameState.character.hp = 0;
+                            GameState.character.isAlive = false;
+                            updateBattleInfo(`${GameState.monster.name}发动致命一击，你已阵亡！`);
+                            startResurrection();
+                        } else {
+                            updateBattleInfo(`${GameState.monster.name}发动攻击，对你造成 ${monsterDamage} 点伤害！`);
+                            updateBattleInfo(`${GameState.monster.name}气血剩余 ${GameState.monster.hp}/${GameState.monster.maxHp}`);
+                        }
+                    }
+                }
+                updateUI();
+            }, 800);
+        }
+        
+        // 更新战斗信息
+        function updateBattleInfo(message) {
+            const battleInfo = document.getElementById('battle-info');
+            battleInfo.innerHTML = `<div style="color: #4682b4; font-weight: bold;">${message}</div>`;
+        }
+        
+        // 击败怪物
+        function defeatMonster() {
+            const spiritReward = Math.floor(
+                GameState.monster.rewardMin + 
+                Math.random() * (GameState.monster.rewardMax - GameState.monster.rewardMin)
+            );
+            GameState.spiritPower += spiritReward;
+            GameState.monsterDefeated++;
+            
+            // 经验值
+            GameState.character.experience += 10 * GameState.monster.level;
+            checkLevelUp();
+            
+            updateBattleInfo(`${GameState.monster.name}已被击败！获得 ${spiritReward} 点灵力`);
+            
+            // 随机掉落装备
+            const droppedEquipment = dropEquipmentOnMonsterDefeat(GameState.monster.level);
+            if (droppedEquipment) {
+                updateBattleInfo(`${GameState.monster.name}掉落了【${droppedEquipment.name}】！`);
+            }
+            
+            setTimeout(() => {
+                loadMonster(GameState.monster.level);
+                updateBattleInfo(`新的${GameState.monster.name}出现了！`);
+                updateUI();
+            }, 1000);
+        }
+        
+        // 检查升级
+        function checkLevelUp() {
+            const requiredExp = GameState.character.level * 100;
+            if (GameState.character.experience >= requiredExp) {
+                GameState.character.level++;
+                GameState.character.experience -= requiredExp;
+                
+                // 升级奖励
+                GameState.character.baseHp += 50;
+                GameState.character.baseAttack += 20;
+                GameState.character.baseDefense += 10;
+                
+                calculateAttributes();
+                
+                showNotification('等级提升', `恭喜升到${GameState.character.level}级！全属性提升！`);
+                updateUI();
+            }
+        }
+        
+        // ============================
+        // 修仙系统
+        // ============================
+        
+        // 开始修炼
+        function startCultivation() {
+            // 清除之前的定时器
+            if (GameState.cultivationInterval) {
+                clearInterval(GameState.cultivationInterval);
+            }
+            
+            // 每5秒增加灵力
+            GameState.cultivationInterval = setInterval(() => {
+                // 计算境界加成
+                const stageMultiplier = 1 + (CULTIVATION_STAGES.indexOf(GameState.cultivationStage) * 0.3);
+                
+                // 计算天赋加成
+                let rewardMultiplier = 1;
+                GameState.selectedBuffs.forEach(buff => {
+                    if (buff.effect === "spiritGain") {
+                        rewardMultiplier += buff.value;
+                    }
+                });
+                
+                const actualReward = Math.round(GameState.stageReward * stageMultiplier * rewardMultiplier);
+                GameState.spiritPower += actualReward;
+                
+                updateUI();
+            }, 5000);
+        }
+        
+        // 闭关修炼
+        function handleCultivation() {
+            // 计算修炼消耗（境界越高消耗越多）
+            const stageIndex = CULTIVATION_STAGES.indexOf(GameState.cultivationStage);
+            const cultivationCost = Math.floor(100 * Math.pow(1.2, stageIndex));
+            
+            if (GameState.spiritPower < cultivationCost) {
+                showNotification('修炼失败', `灵力不足，需要至少${cultivationCost}点灵力进行闭关！`);
+                return;
+            }
+            
+            GameState.spiritPower -= cultivationCost;
+            
+            // 计算修炼速度加成
+            let cultivationSpeed = 1;
+            GameState.selectedBuffs.forEach(buff => {
+                if (buff.effect === "cultivationSpeed") {
+                    cultivationSpeed += buff.value;
+                }
+            });
+            
+            // 增加修炼进度
+            const progressGain = Math.floor((5 + Math.floor(Math.random() * 10)) * cultivationSpeed);
+            GameState.cultivationProgress += progressGain;
+            
+            if (GameState.cultivationProgress >= 100) {
+                // 进阶到下一境界
+                const currentIndex = CULTIVATION_STAGES.indexOf(GameState.cultivationStage);
+                
+                if (currentIndex < CULTIVATION_STAGES.length - 1) {
+                    GameState.cultivationStage = CULTIVATION_STAGES[currentIndex + 1];
+                    GameState.cultivationProgress = 0;
+                    
+                    // 提升角色基础属性
+                    GameState.character.baseHp += 50;
+                    GameState.character.baseAttack += 20;
+                    GameState.character.baseDefense += 10;
+                    
+                    // 体质增加（每升一个大境界体质+5）
+                    if (currentIndex % 3 === 0) {
+                        GameState.character.baseConstitution += 10;
+                        showNotification('体质提升', `突破境界使你的体质永久提升了10点！`);
+                    }
+                    
+                    // 重新计算属性
+                    calculateAttributes();
+                    
+                    showNotification('境界突破', `恭喜！你已突破到${CULTIVATION_STAGES[currentIndex + 1]}！`);
+                } else {
+                    GameState.cultivationProgress = 100;
+                    showNotification('大圆满', '恭喜！你已达到飞升期大圆满境界！');
+                }
+            }
+            
+            showNotification('闭关修炼', `你闭关修炼获得了${progressGain}%的进度！消耗${cultivationCost}灵力`);
+            updateUI();
+        }
+        
+        // ============================
+        // 辅助功能
+        // ============================
+        
+        // 更新UI
+        function updateUI() {
+            // 更新基础信息
+            document.getElementById('refresh-count').textContent = GameState.refreshCount;
+            document.getElementById('refresh-counter').textContent = GameState.refreshCount;
+            
+            // 更新灵力显示
+            document.getElementById('spirit-power').textContent = GameState.spiritPower.toLocaleString();
+            document.getElementById('available-spirit').textContent = GameState.spiritPower.toLocaleString();
+            
+            // 更新等级进度
+            const levelProgress = Math.min(100, (GameState.character.experience / (GameState.character.level * 100)) * 100);
+            document.getElementById('progress-fill').style.width = `${levelProgress}%`;
+            document.getElementById('progress-text').textContent = 
+                `等级 ${GameState.character.level} · ${levelProgress.toFixed(1)}%`;
+            document.getElementById('stage-progress-value').textContent = levelProgress.toFixed(1);
+            
+            // 更新境界修炼进度
+            document.getElementById('cultivation-progress-fill').style.width = `${GameState.cultivationProgress}%`;
+            document.getElementById('cultivation-progress-text').textContent = 
+                `${GameState.cultivationStage} · ${GameState.cultivationProgress}%`;
+            document.getElementById('cultivation-progress-value').textContent = GameState.cultivationProgress;
+            
+            // 更新怪物信息
+            document.getElementById('monster-name').textContent = GameState.monster.name;
+            document.getElementById('monster-hp').textContent = GameState.monster.hp.toLocaleString();
+            document.getElementById('monster-attack').textContent = GameState.monster.attack.toLocaleString();
+            document.getElementById('monster-defense').textContent = GameState.monster.defense.toLocaleString();
+            document.getElementById('monster-cultivation').textContent = GameState.monster.cultivation;
+            
+            // 更新角色信息
+            document.getElementById('character-stage').textContent = GameState.cultivationStage;
+            document.getElementById('character-level').textContent = GameState.character.level;
+            document.getElementById('character-hp').textContent = `${Math.floor(GameState.character.hp)}/${Math.floor(GameState.character.maxHp)}`;
+            document.getElementById('character-attack').textContent = Math.floor(GameState.character.attack);
+            document.getElementById('character-defense').textContent = Math.floor(GameState.character.defense);
+            document.getElementById('character-crit-rate').textContent = `${Math.min(80, Math.floor(GameState.character.critRate))}%`;
+            document.getElementById('character-crit-dmg').textContent = `${Math.floor(GameState.character.critDmg)}%`;
+            document.getElementById('character-dodge').textContent = `${Math.min(80, Math.floor(GameState.character.dodge))}%`;
+            document.getElementById('character-lifeSteal').textContent = `${Math.min(80, Math.floor(GameState.character.lifeSteal))}%`;
+            document.getElementById('character-combo').textContent = `${Math.min(80, Math.floor(GameState.character.combo))}%`;
+            document.getElementById('character-constitution').textContent = Math.floor(GameState.character.constitution);
+            
+            // 更新属性面板
+            document.getElementById('attack-value').textContent = Math.floor(GameState.character.baseAttack);
+            document.getElementById('defense-value').textContent = Math.floor(GameState.character.baseDefense);
+            document.getElementById('hp-value').textContent = Math.floor(GameState.character.baseHp);
+            document.getElementById('constitution-value').textContent = Math.floor(GameState.character.baseConstitution);
+            document.getElementById('attack-cost').textContent = GameState.attributeCosts.attack;
+            document.getElementById('defense-cost').textContent = GameState.attributeCosts.defense;
+            document.getElementById('hp-cost').textContent = GameState.attributeCosts.hp;
+            document.getElementById('constitution-cost').textContent = GameState.attributeCosts.constitution;
+            
+            // 更新挂机状态
+            const rewardMultiplier = 1 + (CULTIVATION_STAGES.indexOf(GameState.cultivationStage) * 0.3);
+            const actualReward = Math.round(GameState.stageReward * rewardMultiplier);
+            document.getElementById('current-reward').textContent = actualReward;
+            document.getElementById('spirit-per-minute').textContent = actualReward;
+            
+            // 更新境界显示
+            document.getElementById('current-stage').textContent = GameState.cultivationStage;
+            document.getElementById('current-stage-display').textContent = GameState.cultivationStage;
+            
+            // 更新击败怪物数
+            document.getElementById('monster-defeated').textContent = GameState.monsterDefeated;
+            
+            // 更新游戏时间
+            document.getElementById('game-time').textContent = formatTime(GameState.gameTime);
+            
+            // 更新最后保存时间
+            if (GameState.lastSaveTime) {
+                document.getElementById('last-save').textContent = new Date(GameState.lastSaveTime).toLocaleTimeString().slice(0,5);
+                document.getElementById('save-time').textContent = new Date(GameState.lastSaveTime).toLocaleString();
+            } else {
+                document.getElementById('save-time').textContent = '未保存';
+            }
+            
+            // 更新自动战斗按钮状态
+            const autoBattleBtn = document.getElementById('auto-battle-btn');
+            if (GameState.autoBattleActive) {
+                autoBattleBtn.classList.add('active');
+                autoBattleBtn.innerHTML = '<i class="fas fa-stop"></i> 停止自动战斗';
+            } else {
+                autoBattleBtn.classList.remove('active');
+                autoBattleBtn.innerHTML = '<i class="fas fa-robot"></i> 自动战斗';
+            }
+            
+            // 更新修炼速度显示
+            let cultivationSpeed = 100;
+            GameState.selectedBuffs.forEach(buff => {
+                if (buff.effect === "cultivationSpeed") {
+                    cultivationSpeed += buff.value * 100;
+                }
+            });
+            document.getElementById('character-cultivation-speed').textContent = `${cultivationSpeed}%`;
+            
+            // 更新战斗状态显示
+            document.getElementById('player-hp-display').textContent = `${Math.floor(GameState.character.hp)}/${Math.floor(GameState.character.maxHp)}`;
+            document.getElementById('monster-hp-display').textContent = `${GameState.monster.hp.toLocaleString()}/${GameState.monster.maxHp.toLocaleString()}`;
+        }
+        
+        // 开始复活倒计时
+        function startResurrection() {
+            const resurrectOverlay = document.getElementById('resurrect-overlay');
+            const resurrectTimer = document.getElementById('resurrect-timer');
+            resurrectOverlay.style.display = 'flex';
+            
+            // 禁用战斗按钮
+            document.getElementById('attack-btn').disabled = true;
+            document.getElementById('auto-battle-btn').disabled = true;
+            
+            let timeLeft = 5;
+            resurrectTimer.textContent = timeLeft;
+            
+            const countdown = setInterval(() => {
+                timeLeft--;
+                resurrectTimer.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    resurrectOverlay.style.display = 'none';
+                    GameState.character.isAlive = true;
+                    GameState.character.hp = GameState.character.maxHp;
+                    
+                    // 启用战斗按钮
+                    document.getElementById('attack-btn').disabled = false;
+                    document.getElementById('auto-battle-btn').disabled = false;
+                    
+                    updateBattleInfo(`你已复活，生命值恢复满！`);
+                    updateUI();
+                }
+            }, 1000);
+        }
+        
+        // 加载怪物
+        function loadMonster(level) {
+            GameState.monster = {...MONSTERS_BY_LEVEL[level]};
+            GameState.monster.level = level;
+            GameState.monster.hp = GameState.monster.maxHp;
+            updateUI();
+        }
+        
+        // 初始化怪物选项
+        function initMonsterOptions() {
+            const monsterSelection = document.getElementById('monster-selection');
+            monsterSelection.innerHTML = '';
+            
+            for (let level = 1; level <= 9; level++) {
+                const monster = MONSTERS_BY_LEVEL[level];
+                const option = document.createElement('div');
+                option.className = `monster-option ${level === 1 ? 'selected' : ''}`;
+                option.dataset.level = level;
+                option.innerHTML = `
+                    <div class="monster-level">${monster.cultivation}妖兽</div>
+                    <div class="monster-reward">灵力奖励: ${monster.rewardMin}-${monster.rewardMax}</div>
+                `;
+                monsterSelection.appendChild(option);
+            }
+        }
+        
+        // 加点属性
+        function addAttribute(attr) {
+            const cost = GameState.attributeCosts[attr];
+            
+            if (GameState.spiritPower < cost) {
+                showNotification('加点失败', `灵力不足，需要${cost}点灵力！`);
+                return;
+            }
+            
+            GameState.spiritPower -= cost;
+            
+            // 增加基础属性
+            switch(attr) {
+                case 'attack':
+                    GameState.character.baseAttack += 5;
+                    break;
+                case 'defense':
+                    GameState.character.baseDefense += 2;
+                    break;
+                case 'hp':
+                    GameState.character.baseHp += 20;
+                    GameState.character.hp += 20;
+                    break;
+                case 'critRate':
+                    GameState.character.baseCritRate += 1;
+                    break;
+                case 'critDmg':
+                    GameState.character.baseCritDmg += 10;
+                    break;
+                case 'dodge':
+                    GameState.character.baseDodge += 1;
+                    break;
+                case 'lifeSteal':
+                    GameState.character.baseLifeSteal += 1;
+                    break;
+                case 'combo':
+                    GameState.character.baseCombo += 1;
+                    break;
+                case 'constitution':
+                    GameState.character.baseConstitution += 1;
+                    break;
+            }
+            
+            // 重新计算属性
+            calculateAttributes();
+            
+            // 增加下次加点消耗
+            GameState.attributeCosts[attr] = Math.round(cost * 1.2);
+            
+            showNotification('属性提升', `${getAttributeName(attr)}提升了！`);
+            updateUI();
+        }
+        
+        // 获取属性名称
+        function getAttributeName(attr) {
+            switch(attr) {
+                case 'attack': return '攻击力';
+                case 'defense': return '防御力';
+                case 'hp': return '生命值';
+                case 'critRate': return '暴击率';
+                case 'critDmg': return '暴击伤害';
+                case 'dodge': return '闪避率';
+                case 'lifeSteal': return '吸血率';
+                case 'combo': return '连击率';
+                case 'constitution': return '体质';
+                default: return '';
+            }
+        }
+        
+        // 自动战斗
+        function toggleAutoBattle() {
+            if (!GameState.character.isAlive) return;
+            
+            GameState.autoBattleActive = !GameState.autoBattleActive;
+            
+            if (GameState.autoBattleActive) {
+                // 开始自动战斗
+                updateBattleInfo('自动战斗已启动！');
+                GameState.autoBattleInterval = setInterval(() => {
+                    if (!GameState.character.isAlive || !GameState.autoBattleActive) {
+                        toggleAutoBattle();
+                        return;
+                    }
+                    
+                    // 执行攻击
+                    performAttack();
+                }, 2000);
+            } else {
+                // 停止自动战斗
+                updateBattleInfo('自动战斗已停止！');
+                clearInterval(GameState.autoBattleInterval);
+                GameState.autoBattleInterval = null;
+            }
+            
+            updateUI();
+        }
+        
+        // ============================
+        // 存档/读档系统
+        // ============================
+        
+        // 保存游戏
+        function saveGame() {
+            const saveData = {
+                version: GameState.VERSION,
+                spiritPower: GameState.spiritPower,
+                cultivationStage: GameState.cultivationStage,
+                stageProgress: GameState.stageProgress,
+                cultivationProgress: GameState.cultivationProgress,
+                selectedBuffs: GameState.selectedBuffs,
+                character: GameState.character,
+                monsterDefeated: GameState.monsterDefeated,
+                gameTime: GameState.gameTime,
+                equipment: GameState.equipment,
+                inventory: GameState.inventory,
+                autoRecycle: GameState.autoRecycle,
+                settings: GameState.settings,
+                lastSaveTime: Date.now()
+            };
+            
+            try {
+                localStorage.setItem('cultivation_save', JSON.stringify(saveData));
+                GameState.lastSaveTime = Date.now();
+                showSaveNotification();
+                showNotification('游戏保存', '游戏进度已保存！');
+                updateUI();
+            } catch (e) {
+                showNotification('保存失败', '保存游戏数据失败，请检查浏览器设置');
+            }
+        }
+        
+        // 显示存档提示
+        function showSaveNotification() {
+            const saveNotification = document.getElementById('save-notification');
+            saveNotification.classList.add('show');
+            
+            setTimeout(() => {
+                saveNotification.classList.remove('show');
+            }, 2000);
+        }
+        
+        // 复制存档到剪贴板
+        function copySaveToClipboard() {
+            const saveData = {
+                version: GameState.VERSION,
+                spiritPower: GameState.spiritPower,
+                cultivationStage: GameState.cultivationStage,
+                stageProgress: GameState.stageProgress,
+                cultivationProgress: GameState.cultivationProgress,
+                selectedBuffs: GameState.selectedBuffs,
+                character: GameState.character,
+                monsterDefeated: GameState.monsterDefeated,
+                gameTime: GameState.gameTime,
+                equipment: GameState.equipment,
+                inventory: GameState.inventory,
+                autoRecycle: GameState.autoRecycle,
+                settings: GameState.settings,
+                lastSaveTime: Date.now()
+            };
+            
+            const dataStr = JSON.stringify(saveData, null, 2);
+            
+            navigator.clipboard.writeText(dataStr).then(() => {
+                showNotification('复制成功', '存档数据已复制到剪贴板！');
+                document.getElementById('copy-status').textContent = '复制成功！';
+                document.getElementById('copy-status').style.color = '#2e8b57';
+                
+                setTimeout(() => {
+                    document.getElementById('copy-status').textContent = '';
+                }, 3000);
+            }).catch(err => {
+                showNotification('复制失败', '复制到剪贴板失败，请手动复制');
+                document.getElementById('copy-status').textContent = '复制失败，请手动复制';
+                document.getElementById('copy-status').style.color = '#dc143c';
+                
+                // 备选方案：创建文本区域
+                const textArea = document.createElement('textarea');
+                textArea.value = dataStr;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                setTimeout(() => {
+                    document.getElementById('copy-status').textContent = '已使用备选方案复制';
+                }, 1000);
+            });
+        }
+        
+        // 从剪贴板粘贴存档
+        function pasteSaveFromClipboard() {
+            navigator.clipboard.readText().then(text => {
+                try {
+                    const saveData = JSON.parse(text);
+                    
+                    // 检查版本兼容性
+                    if (saveData.version && saveData.version.startsWith('4.')) {
+                        if (confirm('粘贴存档将覆盖当前进度，确定要粘贴吗？')) {
+                            // 加载数据
+                            GameState.spiritPower = saveData.spiritPower || 0;
+                            GameState.cultivationStage = saveData.cultivationStage || '炼气初期';
+                            GameState.stageProgress = saveData.stageProgress || 0;
+                            GameState.cultivationProgress = saveData.cultivationProgress || 0;
+                            GameState.selectedBuffs = saveData.selectedBuffs || [];
+                            GameState.character = {...GameState.character, ...saveData.character};
+                            GameState.monsterDefeated = saveData.monsterDefeated || 0;
+                            GameState.gameTime = saveData.gameTime || 0;
+                            GameState.equipment = saveData.equipment || GameState.equipment;
+                            GameState.inventory = saveData.inventory || GameState.inventory;
+                            GameState.autoRecycle = saveData.autoRecycle || GameState.autoRecycle;
+                            GameState.settings = {...GameState.settings, ...saveData.settings};
+                            GameState.lastSaveTime = saveData.lastSaveTime;
+                            
+                            // 重新计算属性
+                            calculateAttributes();
+                            
+                            // 更新UI
+                            updateUI();
+                            updateAutoRecycleUI();
+                            updateBuffsDisplay();
+                            updateEquipmentDisplay();
+                            updateInventoryDisplay();
+                            
+                            showNotification('存档粘贴', '存档数据粘贴成功！');
+                            document.getElementById('paste-status').textContent = '粘贴成功！';
+                            document.getElementById('paste-status').style.color = '#2e8b57';
+                            
+                            setTimeout(() => {
+                                document.getElementById('paste-status').textContent = '';
+                            }, 3000);
+                        }
+                    } else {
+                        showNotification('粘贴失败', '存档版本不兼容！');
+                        document.getElementById('paste-status').textContent = '粘贴失败：版本不兼容';
+                        document.getElementById('paste-status').style.color = '#dc143c';
+                    }
+                } catch (error) {
+                    showNotification('粘贴失败', '剪贴板数据格式错误！');
+                    document.getElementById('paste-status').textContent = '粘贴失败：数据格式错误';
+                    document.getElementById('paste-status').style.color = '#dc143c';
+                }
+            }).catch(err => {
+                showNotification('粘贴失败', '无法读取剪贴板，请检查权限');
+                document.getElementById('paste-status').textContent = '粘贴失败：无法读取剪贴板';
+                document.getElementById('paste-status').style.color = '#dc143c';
+            });
+        }
+        
+        // 加载游戏
+        function loadGameData() {
+            try {
+                const savedData = localStorage.getItem('cultivation_save');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    
+                    // 检查版本兼容性
+                    if (data.version && data.version.startsWith('4.')) {
+                        // 加载数据
+                        GameState.spiritPower = data.spiritPower || 0;
+                        GameState.cultivationStage = data.cultivationStage || '炼气初期';
+                        GameState.stageProgress = data.stageProgress || 0;
+                        GameState.cultivationProgress = data.cultivationProgress || 0;
+                        GameState.selectedBuffs = data.selectedBuffs || [];
+                        GameState.character = {...GameState.character, ...data.character};
+                        GameState.monsterDefeated = data.monsterDefeated || 0;
+                        GameState.gameTime = data.gameTime || 0;
+                        GameState.equipment = data.equipment || GameState.equipment;
+                        GameState.inventory = data.inventory || GameState.inventory;
+                        GameState.autoRecycle = data.autoRecycle || GameState.autoRecycle;
+                        GameState.settings = {...GameState.settings, ...data.settings};
+                        GameState.lastSaveTime = data.lastSaveTime;
+                        
+                        // 重新计算属性
+                        calculateAttributes();
+                        
+                        return true;
+                    } else {
+                        console.log('存档版本不兼容，使用新游戏');
+                    }
+                }
+            } catch (e) {
+                console.error('加载存档失败:', e);
+            }
+            
+            return false;
+        }
+        
+        // 开始自动保存
+        function startAutoSave() {
+            if (GameState.settings.autosaveEnabled) {
+                setInterval(() => {
+                    saveGame();
+                }, GameState.settings.saveInterval);
+            }
+        }
+        
+        // 开始游戏计时器
+        function startGameTimer() {
+            setInterval(() => {
+                GameState.gameTime++;
+                if (GameState.gameTime % 60 === 0) {
+                    updateUI(); // 每分钟更新一次时间显示
+                }
+            }, 1000);
+        }
+        
+        // 格式化时间
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // 重置游戏
+        function resetGame() {
+            if (confirm('确定要重置游戏吗？这将清除所有进度并重新开始！')) {
+                // 清除本地存储
+                localStorage.removeItem('cultivation_save');
+                
+                // 重新加载页面
+                location.reload();
+            }
+        }
+        
+        // ============================
+        // 移动端导航
+        // ============================
+        
+        function setupMobileNavigation() {
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const target = this.dataset.target;
+                    
+                    // 移除所有激活状态
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    
+                    // 添加当前激活状态
+                    this.classList.add('active');
+                    
+                    // 处理点击动作
+                    switch(target) {
+                        case 'talent-panel':
+                            document.getElementById('talent-panel').style.display = 'block';
+                            document.getElementById('attribute-panel').style.display = 'none';
+                            break;
+                        case 'attribute-panel':
+                            document.getElementById('talent-panel').style.display = 'none';
+                            document.getElementById('attribute-panel').style.display = 'block';
+                            break;
+                        case 'cultivate-btn':
+                            handleCultivation();
+                            break;
+                        case 'monster-battle':
+                            // 滚动到怪物战斗区域
+                            document.getElementById('monster-battle').scrollIntoView({behavior: 'smooth'});
+                            break;
+                        case 'equipment-content':
+                            // 切换到装备标签
+                            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+                            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                            document.querySelector('[data-tab="equipment"]').classList.add('active');
+                            document.getElementById('equipment-content').classList.add('active');
+                            // 显示天赋面板
+                            document.getElementById('talent-panel').style.display = 'block';
+                            document.getElementById('attribute-panel').style.display = 'none';
+                            break;
+                    }
+                });
+            });
+        }
+        
+        // ============================
+        // 触摸事件处理
+        // ============================
+        
+        function setupTouchEvents() {
+            let touchStartTime = 0;
+            
+            // 长按事件处理
+            document.addEventListener('touchstart', function(e) {
+                touchStartTime = Date.now();
+                
+                const equipmentSlot = e.target.closest('.equipment-slot');
+                if (equipmentSlot) {
+                    const slotType = equipmentSlot.dataset.slot;
+                    
+                    // 设置长按定时器
+                    equipmentSlot.longPressTimer = setTimeout(() => {
+                        let item = null;
+                        item = GameState.equipment[slotType];
+                        
+                        if (item && confirm(`确定脱下【${item.name}】吗？`)) {
+                            unequipItem(slotType);
+                        }
+                    }, 1000); // 1秒长按
+                }
+            }, { passive: true });
+            
+            document.addEventListener('touchend', function(e) {
+                // 清除长按定时器
+                const equipmentSlot = e.target.closest('.equipment-slot');
+                if (equipmentSlot && equipmentSlot.longPressTimer) {
+                    clearTimeout(equipmentSlot.longPressTimer);
+                }
+            });
+            
+            // 双击事件处理
+            let lastTap = 0;
+            document.addEventListener('touchend', function(e) {
+                const inventoryItem = e.target.closest('.inventory-item');
+                if (inventoryItem) {
+                    const currentTime = Date.now();
+                    const tapLength = currentTime - lastTap;
+                    
+                    if (tapLength < 300 && tapLength > 0) {
+                        // 双击事件
+                        const itemIndex = parseInt(inventoryItem.dataset.index);
+                        const item = GameState.inventory[itemIndex];
+                        
+                        if (item) {
+                            equipItem(itemIndex);
+                        }
+                    }
+                    lastTap = currentTime;
+                }
+            });
+        }
+        
+        // ============================
+        // 初始化事件监听
+        // ============================
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initGame();
+            setupMobileNavigation();
+            setupTouchEvents();
+            
+            // 天赋选择
+            document.getElementById('buff-container').addEventListener('click', (e) => {
+                const buffCard = e.target.closest('.buff-card');
+                if (!buffCard) return;
+                
+                // 锁定按钮处理
+                if (e.target.closest('.lock-icon')) {
+                    e.stopPropagation();
+                    const index = parseInt(buffCard.dataset.index);
+                    toggleBuffLock(index);
+                    return;
+                }
+                const index = parseInt(buffCard.dataset.index);
+                toggleBuffSelection(index);
+            });
+            
+            // 刷新天赋按钮
+            document.getElementById('refresh-btn').addEventListener('click', refreshBuffs);
+            
+            // 开始修仙按钮
+            document.getElementById('start-btn').addEventListener('click', () => {
+                showNotification('修仙开始', '修仙之路正式开启！祝道友早日得道成仙！');
+                
+                // 隐藏天赋面板，显示属性面板
+                document.getElementById('talent-panel').style.display = 'none';
+                document.getElementById('attribute-panel').style.display = 'block';
+                
+                // 启用修炼功能
+                document.getElementById('cultivate-btn').disabled = false;
+                
+                // 开始修炼
+                startCultivation();
+                updateUI();
+                
+                // 更新导航激活状态
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.dataset.target === 'attribute-panel') {
+                        item.classList.add('active');
+                    }
+                });
+                
+                // 显示重置游戏按钮
+                document.getElementById('reset-game-btn-2').style.display = 'block';
+            });
+            
+            // 闭关修炼按钮
+            document.getElementById('cultivate-btn').addEventListener('click', handleCultivation);
+            
+            // 战斗按钮
+            document.getElementById('attack-btn').addEventListener('click', () => {
+                handleBattleAction('attack');
+            });
+            
+            // 自动战斗按钮
+            document.getElementById('auto-battle-btn').addEventListener('click', toggleAutoBattle);
+            
+            // 怪物选择
+            document.getElementById('monster-selection').addEventListener('click', function(e) {
+                const monsterOption = e.target.closest('.monster-option');
+                if (monsterOption) {
+                    // 移除其他选项的选择状态
+                    document.querySelectorAll('.monster-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    // 设置当前选项为选中状态
+                    monsterOption.classList.add('selected');
+                    
+                    // 加载对应等级的怪物
+                    const level = parseInt(monsterOption.dataset.level);
+                    loadMonster(level);
+                    updateBattleInfo(`你选择了挑战${MONSTERS_BY_LEVEL[level].name}！`);
+                }
+            });
+            
+            // 属性加点
+            document.querySelectorAll('.stat-card-add').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const attr = this.dataset.attr;
+                    addAttribute(attr);
+                });
+            });
+            
+            // 属性加点面板
+            document.querySelectorAll('.attribute-add').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const attr = this.dataset.attr;
+                    addAttribute(attr);
+                });
+            });
+            
+            // 选项卡切换
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.dataset.tab;
+                    
+                    // 移除所有激活状态
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // 添加当前激活状态
+                    this.classList.add('active');
+                    document.getElementById(`${tabId}-content`).classList.add('active');
+                    
+                    // 如果是装备标签，更新背包显示
+                    if (tabId === 'equipment') {
+                        updateInventoryDisplay();
+                    }
+                    // 如果是自动回收标签，更新设置显示
+                    else if (tabId === 'recycle') {
+                        updateAutoRecycleUI();
+                    }
+                    // 如果是存档标签，更新存档信息
+                    else if (tabId === 'saves') {
+                        updateUI();
+                    }
+                });
+            });
+            
+            // 装备栏点击
+            document.getElementById('equipment-grid').addEventListener('click', (e) => {
+                const equipmentSlot = e.target.closest('.equipment-slot');
+                if (equipmentSlot) {
+                    const slotType = equipmentSlot.dataset.slot;
+                    
+                    // 如果装备槽有装备，显示详情
+                    const item = GameState.equipment[slotType];
+                    if (item) {
+                        showEquipmentDetails(item);
+                    } else {
+                        // 如果没有装备，显示可以穿戴的装备
+                        showEquipmentDetails(null);
+                    }
+                }
+            });
+            
+            // 背包物品点击
+            document.getElementById('inventory-grid').addEventListener('click', (e) => {
+                const inventoryItem = e.target.closest('.inventory-item');
+                if (inventoryItem) {
+                    const itemIndex = parseInt(inventoryItem.dataset.index);
+                    
+                    // 切换选中状态
+                    if (GameState.selectedInventoryItem === itemIndex) {
+                        GameState.selectedInventoryItem = null;
+                    } else {
+                        GameState.selectedInventoryItem = itemIndex;
+                    }
+                    
+                    // 更新背包显示
+                    updateInventoryDisplay();
+                    
+                    // 显示装备详情
+                    const item = GameState.inventory[itemIndex];
+                    if (item) {
+                        showEquipmentDetails(item);
+                    }
+                }
+            });
+            
+            // 装备栏右键点击（脱下装备）- 桌面端
+            document.getElementById('equipment-grid').addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                const equipmentSlot = e.target.closest('.equipment-slot');
+                if (equipmentSlot) {
+                    const slotType = equipmentSlot.dataset.slot;
+                    
+                    const item = GameState.equipment[slotType];
+                    
+                    if (item && confirm(`确定脱下【${item.name}】吗？`)) {
+                        unequipItem(slotType);
+                    }
+                }
+            });
+            
+            // 背包物品双击（穿戴装备）- 桌面端
+            document.getElementById('inventory-grid').addEventListener('dblclick', (e) => {
+                const inventoryItem = e.target.closest('.inventory-item');
+                if (inventoryItem) {
+                    const itemIndex = parseInt(inventoryItem.dataset.index);
+                    const item = GameState.inventory[itemIndex];
+                    
+                    if (item) {
+                        equipItem(itemIndex);
+                    }
+                }
+            });
+            
+            // 出售装备按钮
+            document.getElementById('sell-equipment-btn').addEventListener('click', sellSelectedEquipment);
+            
+            // 自动回收功能
+            document.getElementById('manual-recycle-btn').addEventListener('click', manualRecycleBackpack);
+            document.getElementById('save-settings-btn').addEventListener('click', saveAutoRecycleSettings);
+            
+            // 存档管理功能
+            document.getElementById('copy-save-btn').addEventListener('click', copySaveToClipboard);
+            document.getElementById('paste-save-btn').addEventListener('click', pasteSaveFromClipboard);
+            document.getElementById('quick-save-btn').addEventListener('click', saveGame);
+            document.getElementById('load-last-btn').addEventListener('click', () => {
+                if (confirm('加载上次存档将覆盖当前进度，确定要加载吗？')) {
+                    location.reload(); // 重新加载页面会自动加载存档
+                }
+            });
+            
+            // 重置游戏按钮
+            document.getElementById('reset-game-btn').addEventListener('click', resetGame);
+            document.getElementById('reset-game-btn-2').addEventListener('click', resetGame);
+            
+            // 版本显示
+            document.getElementById('save-version').textContent = GameState.VERSION;
+        });
+    </script>
+</body>
+</html>
